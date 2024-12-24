@@ -5,7 +5,7 @@ import mainimage from "../assets/Container-4.svg";
 import image1 from "../assets/SVG.svg";
 import image2 from "../assets/Clip path group.svg";
 import arrow from "../assets/SVG-2.svg";
-import "./Start.css";
+import "./start.css";
 
 const Home = () => {
   return (
