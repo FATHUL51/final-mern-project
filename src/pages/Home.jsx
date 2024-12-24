@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./Home.css";
 import blue from "../assets/loginAssets/1toggle.svg";
-import blue1 from "../assets/loginAssets/toggle.svg";
+import blue1 from "../assets/loginAssets/Toggle.svg";
 import down from "../assets/loginAssets/Vector (1).svg";
 import createlogo from "../assets/SVG (1).svg";
 import delete1 from "../assets/delete.svg";
