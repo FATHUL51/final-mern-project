@@ -422,44 +422,45 @@ const Home = () => {
                     selectedFile === file._id ? "selected-file" : ""
                   }`}
                 >
-                  <div className="formbottext">
-                    <img
-                      onClick={(e) => {
-                        e.stopPropagation(); // Prevent triggering file selection
-                        handledeletefile(file._id);
-                      }}
-                      src={delete1}
-                      alt=""
-                    />
-                    <Link to="/Workspace" className="typebotclick">
-                      <span className="typebottext1">{file.filename}</span>
-                    </Link>
+                  <Link to="/Workspace" className="typebotclick">
+                    <div className="formbottext">
+                      <img
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent triggering file selection
+                          handledeletefile(file._id);
+                        }}
+                        src={delete1}
+                        alt=""
+                      />
 
-                    {deleteFilePopup === file._id && (
-                      <div className="filedeleteform visible">
-                        <p className="foldersCreatetext">
-                          Are you sure you want to delete this file?
-                        </p>
-                        <div>
-                          <button
-                            className="done"
-                            onClick={() => {
-                              deleteFile(file._id);
-                              closeDeleteFilePopup();
-                            }}
-                          >
-                            Done
-                          </button>
-                          <button
-                            className="cancel"
-                            onClick={() => closeDeleteFilePopup()}
-                          >
-                            Cancel
-                          </button>
+                      <p className="typebottext1">{file.filename}</p>
+
+                      {deleteFilePopup === file._id && (
+                        <div className="filedeleteform visible">
+                          <p className="foldersCreatetext">
+                            Are you sure you want to delete this file?
+                          </p>
+                          <div>
+                            <button
+                              className="done"
+                              onClick={() => {
+                                deleteFile(file._id);
+                                closeDeleteFilePopup();
+                              }}
+                            >
+                              Done
+                            </button>
+                            <button
+                              className="cancel"
+                              onClick={() => closeDeleteFilePopup()}
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  </Link>
                 </div>
               </span>
             ))}
