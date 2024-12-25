@@ -4,9 +4,9 @@ import Start from "./pages/Start";
 import Login from "./pages/UserLogin";
 import Signup from "./pages/UserSignup";
 import UserProtectedWrapper from "./pages/UserProtectedWrapper";
-import UserLogout from "./pages/UserLogout";
 import Home from "./pages/Home";
 import Setting from "./pages/Setting";
+import Workspace from "./pages/workspace";
 
 const App = () => {
   return (
@@ -24,18 +24,18 @@ const App = () => {
         <Route path="/Login" element={<Login />} />
         <Route path="/Signup" element={<Signup />} />
         <Route
-          path="/User/Logout"
-          element={
-            <UserProtectedWrapper>
-              <UserLogout />
-            </UserProtectedWrapper>
-          }
-        />
-        <Route
           path="User/Setting"
           element={
             <UserProtectedWrapper>
               <Setting />
+            </UserProtectedWrapper>
+          }
+        />
+        <Route
+          path="Workspace"
+          element={
+            <UserProtectedWrapper>
+              <Workspace />
             </UserProtectedWrapper>
           }
         />

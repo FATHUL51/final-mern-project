@@ -45,8 +45,8 @@
     text-align: center;
     font-size: 0.8rem;
     font-weight: 600;
-    margin: 3px 0 0 0;
-    padding: 5px 15px;
+    margin: 0;
+    padding: 7px 15px;
     border-bottom:solid 2px #282c34;
   }
   .logout{
@@ -57,8 +57,8 @@
     text-align: center;
     font-size: 0.8rem;
     font-weight: 600;
-    margin: 0 0 3px 0;
-    padding: 5px 15px;
+    margin: 0 ;
+    padding: 7px 15px;
     color:#ffa54c;
   }
 
@@ -66,7 +66,7 @@
 .username {
   display: flex;
   position: absolute;
-  top:1rem;
+  top:.8rem;
   flex-direction: column;
   width: 20%;
   justify-content: center;
@@ -78,14 +78,14 @@
 }
 .username1 {
   display: flex;
-  width: stretch;
+  width: max-content;
   font-family: "Open Sans";
   justify-content: center;
   text-align: center;
   font-size: 0.8rem;
   font-weight: 600;
   margin: 0;
-  padding: 5px 15px;
+  padding: 7px 15px;
 }
 .downmenu {
   display: flex;
@@ -139,6 +139,23 @@ hr {
   margin: auto;
   height: 90%;
 }
+.selected-folder{
+  background-color: white;
+  color:#000;
+  border-radius: 0.4rem;
+
+}
+
+.selected-file {
+  background-color: transparent;
+  border:solid 1px white;
+  border-radius: 0.4rem;
+}
+
+.folder-item:hover,
+.formbotname:hover {
+  cursor: pointer;
+}
 .foldersname {
   display: flex;
   align-items: center;
@@ -175,7 +192,7 @@ hr {
   color: #fff;
   justify-content: center;
   align-items: center;
-  margin-right: 1rem;
+  margin: 0 1rem;
   padding: 0.01rem 1rem;
   border: none;
   border-radius: 0.4rem;
@@ -186,10 +203,12 @@ hr {
 }
 .typebot {
   display: inline-grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
   gap: 1rem;
-  margin: 10px 0 0 0;
-  padding: 10px 0 0 0;
+  margin: 10px 16px 0 0;
+  overflow-y: scroll;
+  padding: 10px 15px 0 0;
+  overflow-x: hidden;
 }
 .typebotname {
   background-color: #1a5fff;
@@ -234,6 +253,13 @@ hr {
   font-size: 0.9rem;
   font-weight: 600;
   color: white;
+  height: 10rem;
+  width: 10rem;
+  display: flex
+;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
 
   img {
     width: 1.5rem;
@@ -496,4 +522,13 @@ hr {
       font-weight: 600;
       padding: 0.5rem;
     }
+}
+.folders{
+  cursor: pointer;
+}
+
+.typebotclick{
+  display: flex;
+  color:white;
+text-decoration: none;
 }
