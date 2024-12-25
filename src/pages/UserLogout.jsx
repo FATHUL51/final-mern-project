@@ -17,8 +17,9 @@ const UserLogout = () => {
         }
       );
       if (response.status === 200) {
+        alert("logou sucessful");
         localStorage.removeItem("token");
-        navigate("/login");
+        navigate("/Login");
       }
     } catch (error) {
       console.log(error);

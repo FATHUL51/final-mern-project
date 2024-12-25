@@ -1,41 +1,5 @@
 {
-    "version": 2,
-    "name": "vite-react-app",
-    "builds": [
-      {
-        "src": "package.json",
-        "use": "@vercel/static-build",
-        "config": {
-          "distDir": "dist"
-        }
-      }
-    ],
-    "routes": [
-      {
-        "src": "/(.*)",
-        "dest": "/index.html"
-      }
-    ],
-    "env": {
-        "VITE_BACKEND_URL":"https://mern-backend-tnwv.onrender.com"
-    },
-    "headers": [
-      {
-        "source": "/(.*)",
-        "headers": [
-          {
-            "key": "X-Powered-By",
-            "value": "Vite"
-          }
-        ]
-      }
-    ],
-    "redirects": [
-      {
-        "source": "/old-url",
-        "destination": "/new-url",
-        "permanent": true
-      }
-    ]
-  }
-  
+  "rewrites":[
+      {"source":"/(.*)","destination":"/"}
+  ]
+}

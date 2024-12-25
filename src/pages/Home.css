@@ -12,6 +12,7 @@
   align-items: center;
   gap: 10px;
   padding: 5px;
+  height: 3rem;
 }
 .profile {
   display: flex;
@@ -25,14 +26,55 @@
   width: 85%;
   font-family: "Open Sans";
 }
-.username {
+.logouconatiner{
+  display: none;
+}
+.logouconatiner.visible{
   display: flex;
-  width: 40%;
+  flex-direction: column;
+  width: 100%;
   justify-content: center;
   margin: 0;
   padding: 0;
-  border: solid 2px #282c34;
+  border-top: solid 2px #282c34;
+  background-color: #000;
+  .setting{
+    display: flex;
+    font-family: "Open Sans";
+    justify-content: start;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 3px 0 0 0;
+    padding: 5px 15px;
+    border-bottom:solid 2px #282c34;
+  }
+  .logout{
+    display: flex;
+    width: stretch;
+    font-family: "Open Sans";
+    justify-content: start;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 0 0 3px 0;
+    padding: 5px 15px;
+    color:#ffa54c;
+  }
+
+}
+.username {
+  display: flex;
+  position: absolute;
+  top:1rem;
+  flex-direction: column;
+  width: 20%;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: solid 2px #342828;
   border-radius: 0.4rem;
+  z-index: 98;
 }
 .username1 {
   display: flex;
@@ -72,9 +114,11 @@
   font-weight: 600;
 }
 hr {
+  position: relative;
   margin: 0;
   padding: 0;
   border-width: 0.01rem;
+  z-index: 1;
 }
 .btn {
   font-family: "Open Sans";
@@ -335,4 +379,121 @@ hr {
     font-weight: 600;
     padding: 0.5rem;
   }
+}
+.filedeleteform{
+  display:none;
+}
+.filedeleteform.visible{
+  display: flex;
+  flex-direction: column;
+  width: 15rem;
+  justify-items: center;
+  text-align: center;
+  height: 8rem;
+  border: solid 2px #282c34;
+  border-radius: 0.4rem;
+  padding: 1rem;
+  position: absolute;
+  background-color: black;
+  z-index: 1;
+  p {
+    font-family: "Open Sans";
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+  }
+  div {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    .done {
+      color: #4b83ff;
+      border-right: solid 0.001rem #fff;
+      font-family: "Open Sans";
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .cancel {
+      color: white;
+      font-family: "Open Sans";
+      font-size: 1rem;
+      font-weight: 600;
+    }
+  }
+
+  button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+    height: 1.5rem;
+    background: #000;
+    border: none;
+    color: white;
+    font-family: "Open Sans";
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.5rem;
+  }
+
+}
+.folderdeletefrom{
+  display: none;
+}
+.folderdeletefrom.visible{
+    display: flex;
+    flex-direction: column;
+    width: 15rem;
+    justify-items: center;
+    text-align: center;
+    height: 8rem;
+    border: solid 2px #282c34;
+    border-radius: 0.4rem;
+    padding: 1rem;
+    position: absolute;
+    background-color: black;
+    z-index: 1;
+    p {
+      font-family: "Open Sans";
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
+    }
+    div {
+      display: flex;
+      flex-direction: row;
+      gap: 1rem;
+      justify-content: center;
+      align-items: center;
+      .done {
+        color: #4b83ff;
+        border-right: solid 0.001rem #fff;
+        font-family: "Open Sans";
+        font-size: 1rem;
+        font-weight: 600;
+      }
+      .cancel {
+        color: white;
+        font-family: "Open Sans";
+        font-size: 1rem;
+        font-weight: 600;
+      }
+    }
+  
+    button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 50%;
+      height: 1.5rem;
+      background: #000;
+      border: none;
+      color: white;
+      font-family: "Open Sans";
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.5rem;
+    }
 }

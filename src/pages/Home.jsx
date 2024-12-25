@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import "./Home.css";
 import blue from "../assets/loginAssets/1toggle.svg";
 import blue1 from "../assets/loginAssets/Toggle.svg";
@@ -16,10 +17,13 @@ const Home = () => {
   const [isToggled, setIsToggled] = useState(false);
   const [isFolder, setIsFolder] = useState(false);
   const [isFolder1, setIsFolder1] = useState(false);
+  const [deleteFilePopup, setDeleteFilePopup] = useState(null);
+  const [deleteFolderPopup, setDeleteFolderPopup] = useState(null);
   const [foldername, setFoldername] = useState("");
   const [filename, setFilename] = useState("");
   const [fileGetname, setFileGetname] = useState([]);
   const [folderData, setFolderData] = useState([]);
+  const [toggledown, setToggledown] = useState(false);
 
   const handleclick = () => {
     setIsDark(!isDark);
@@ -101,11 +105,11 @@ const Home = () => {
 
       if (response.status === 201) {
         // Check for success status code
-        console.log("file created successfully:", response.data);
         fetchfile(); // Refresh the folder list after creation
         alert("file created successfully");
         setIsFolder1(false); // Close popup
         setFilename(""); // Reset input field
+        window.location.reload;
       }
     } catch (error) {
       if (error.response) {
@@ -193,11 +197,29 @@ const Home = () => {
       );
 
       alert(response.data.message); // Notify the user
-      fetchform(); // Refresh the file list
+      fetchfile(); // Refresh the file list
+      window.location.reload;
     } catch (error) {
       console.error("Error deleting file:", error);
       alert(error.response?.data?.message || "Failed to delete the file.");
     }
+  };
+  const handleDeleteFolderPopup = (folderId) => {
+    setDeleteFolderPopup(folderId); // Set the popup visibility for the specific folder
+  };
+
+  const closeDeleteFolderPopup = () => {
+    setDeleteFolderPopup(null); // Close the popup
+  };
+  const handledeletefile = (fileId) => {
+    setDeleteFilePopup(fileId); // Set the popup visibility for the specific file
+  };
+
+  const closeDeleteFilePopup = () => {
+    setDeleteFilePopup(null); // Close the popup
+  };
+  const toogledown = () => {
+    setToggledown((prev) => !prev);
   };
 
   useEffect(() => {
@@ -214,9 +236,22 @@ const Home = () => {
       <div className="container">
         <div className="profile">
           <div className="username">
-            <p className="username1">{data.username}'s workspace</p>
-            <div className="downmenu">
-              <img className="down" src={down} alt="" />
+            <span
+              style={{ display: "flex", flexDirection: "row" }}
+              onClick={() => {
+                toogledown();
+              }}
+            >
+              <p className="username1">{data.username}'s workspace</p>
+              <div className="downmenu">
+                <img className="down" src={down} alt="" />
+              </div>
+            </span>
+            <div className={`logouconatiner ${toggledown ? "visible" : ""}`}>
+              <div className="setting">Settings</div>
+              <Link to="/User/Setting">
+                <div className="logout">Logout</div>
+              </Link>
             </div>
           </div>
         </div>
@@ -261,7 +296,6 @@ const Home = () => {
                 className="done"
                 onClick={(e) => {
                   submitform(e);
-                  console.log("Done clicked");
                 }}
               >
                 Done
@@ -269,7 +303,6 @@ const Home = () => {
               <button
                 onClick={() => {
                   setIsFolder(false);
-                  console.log("cancel clicked");
                 }}
                 className="cancel"
               >
@@ -278,15 +311,41 @@ const Home = () => {
             </div>
           </div>
           {folderData.map((folder) => (
-            <p className="folders" key={folder._id}>
-              {folder.foldername}
-              <img
-                className="delete1"
-                onClick={() => deleteFolder(folder._id)}
-                src={delete1}
-                alt="Delete"
-              />
-            </p>
+            <span key={folder._id} className="folder-item">
+              <p className="folders" key={folder._id}>
+                {folder.foldername}
+                <img
+                  className="delete1"
+                  onClick={() => handleDeleteFolderPopup(folder._id)}
+                  src={delete1}
+                  alt="Delete"
+                />
+              </p>
+              {deleteFolderPopup === folder._id && ( // Show popup only for the specific folder
+                <div className="folderdeletefrom visible">
+                  <p className="foldersCreatetext">
+                    Are you sure you want to delete this folder?
+                  </p>
+                  <div>
+                    <button
+                      className="done"
+                      onClick={() => {
+                        deleteFolder(folder._id);
+                        closeDeleteFolderPopup(); // Close popup after deletion
+                      }}
+                    >
+                      Done
+                    </button>
+                    <button
+                      className="cancel"
+                      onClick={() => closeDeleteFolderPopup()}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </span>
           ))}
         </div>
         <div>
@@ -333,14 +392,38 @@ const Home = () => {
                     <div className="formbottext">
                       <img
                         onClick={() => {
-                          deleteFile(item._id);
+                          handledeletefile(item._id);
                         }}
                         src={delete1}
                         alt=""
                       />
-                      <span className="formbottext" key={item._id}>
-                        {item.filename}
-                      </span>
+                      <span className="formbottext">{item.filename}</span>
+                      {deleteFilePopup === item._id && ( // Show popup only for the specific file
+                        <div className="filedeleteform visible">
+                          <p className="foldersCreatetext">
+                            Are you sure you want to delete this file?
+                          </p>
+                          <div>
+                            <button
+                              className="done"
+                              onClick={() => {
+                                deleteFile(item._id);
+                                closeDeleteFilePopup(); // Close popup after deletion
+                              }}
+                            >
+                              Done
+                            </button>
+                            <button
+                              onClick={() => {
+                                closeDeleteFilePopup();
+                              }}
+                              className="cancel"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
