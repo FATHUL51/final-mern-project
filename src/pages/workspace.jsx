@@ -32,13 +32,14 @@ const workspace = () => {
   const [addedComponents, setAddedComponents] = useState([]);
   const [data, setData] = useState({
     formname: "",
-    bubble: "",
+    bubble_text: "",
     text: "",
     image: "",
     number: "",
     email: "",
     phone: "",
     rating: "",
+    date: "",
     button: "",
   });
   const [fileData, setFileData] = useState(null);
@@ -55,7 +56,7 @@ const workspace = () => {
   };
 
   const handleInputChange = (id, value) => {
-    console.log(`Input Change: ID=${id}, Value=${value}`); // Log input changes
+    // console.log(`Input Change: ID=${id}, Value=${value}`); // Log input changes
     setAddedComponents((prev) =>
       prev.map((comp) =>
         comp.id === id ? { ...comp, value, error: value.trim() === "" } : comp
@@ -68,10 +69,10 @@ const workspace = () => {
         ...prevData,
         [updatedComponent.name.toLowerCase()]: value,
       }));
-      console.log("Updated Data State:", {
-        ...data,
-        [updatedComponent.name.toLowerCase()]: value,
-      });
+      // console.log("Updated Data State:", {
+      //   ...data,
+      //   [updatedComponent.name.toLowerCase()]: value,
+      // });
     }
   };
 
@@ -99,13 +100,15 @@ const workspace = () => {
     // Build the data object with the file ID
     const formattedData = {
       file: fileId, // Include file ID
-      formname: data.formname || "", // Add formname explicitly
+      formname: data.formname, // Add formname explicitly
     };
 
     // Add dynamically generated fields
     addedComponents.forEach((comp) => {
       formattedData[comp.name.toLowerCase()] = comp.value;
     });
+
+    // console.log("Data being sent to backend:", formattedData);
 
     try {
       const response = await axios.post(
@@ -143,13 +146,14 @@ const workspace = () => {
     const resetState = () => {
       setData({
         formname: "",
-        bubble: "",
+        bubble_text: "",
         text: "",
         image: "",
         number: "",
         email: "",
         phone: "",
         rating: "",
+        date: "",
         button: "",
       });
       setAddedComponents([]);
@@ -182,6 +186,12 @@ const workspace = () => {
           allowedKeys.forEach((key) => {
             filteredData[key] = formData[key] || "";
           });
+
+          if (filteredData.date) {
+            filteredData.date = new Date(filteredData.date)
+              .toISOString()
+              .split("T")[0];
+          }
 
           setData(filteredData);
 
@@ -337,28 +347,6 @@ const workspace = () => {
       navigate("/home");
     }
   };
-  const getComponentImage = (name) => {
-    switch (name) {
-      case "Text":
-        return text;
-      case "Image":
-        return photo;
-      case "Number":
-        return number;
-      case "Email":
-        return email;
-      case "Phone":
-        return phone;
-      case "Date":
-        return date;
-      case "Rating":
-        return rating;
-      case "Button":
-        return button;
-      default:
-        return "";
-    }
-  };
 
   return (
     <div className="home">
@@ -451,7 +439,7 @@ const workspace = () => {
               <div className="bubbles">
                 <div
                   className="content"
-                  onClick={() => handleComponentClick("Text")}
+                  onClick={() => handleComponentClick("Bubble_text")}
                 >
                   <img src={message} alt="" />
                   Text
@@ -536,31 +524,41 @@ const workspace = () => {
                   gap: "1rem",
                 }}
               >
-                {addedComponents.map((comp) => (
-                  <div className="contents1" key={comp.id}>
-                    <span>{comp.name}</span>
-                    <input
-                      className="inputs11"
-                      type="text"
-                      value={comp.value || ""}
-                      placeholder={`Enter details for ${comp.name}`}
-                      onChange={(e) =>
-                        handleInputChange(comp.id, e.target.value)
-                      }
-                      onBlur={(e) => handleBlur(comp.id, e.target.value)}
-                      style={{
-                        borderColor: comp.error ? "red" : "#282c34",
-                      }}
-                    />
-                    {comp.error && <p className="error-text">Required Field</p>}
-                    <img
-                      className="delete"
-                      src={deletes}
-                      alt="Delete"
-                      onClick={() => handleDeleteComponent(comp.id)}
-                    />
-                  </div>
-                ))}
+                {addedComponents.map((comp) => {
+                  const inputType = ["Image", "Button", "Bubble_text"].includes(
+                    comp.name
+                  )
+                    ? "text"
+                    : comp.name.toLowerCase();
+
+                  return (
+                    <div className="contents1" key={comp.id}>
+                      <span>{comp.name}</span>
+                      <input
+                        className="inputs11"
+                        type={inputType}
+                        value={comp.value || ""}
+                        placeholder={`Enter details for ${comp.name}`}
+                        onChange={(e) =>
+                          handleInputChange(comp.id, e.target.value)
+                        }
+                        onBlur={(e) => handleBlur(comp.id, e.target.value)}
+                        style={{
+                          borderColor: comp.error ? "red" : "#282c34",
+                        }}
+                      />
+                      {comp.error && (
+                        <p className="error-text">Required Field</p>
+                      )}
+                      <img
+                        className="delete"
+                        src={deletes} // Replace with the correct delete icon
+                        alt="Delete"
+                        onClick={() => handleDeleteComponent(comp.id)}
+                      />
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
