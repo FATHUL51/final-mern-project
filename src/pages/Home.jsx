@@ -226,6 +226,9 @@ const Home = () => {
   const handleFileClick = (fileId) => {
     setSelectedFile(fileId === selectedFile ? null : fileId); // Toggle selection
   };
+  const gotoworkshop = (fileId) => {
+    navigate(`/Workspace`);
+  };
 
   useEffect(() => {
     fetchData();
@@ -422,45 +425,44 @@ const Home = () => {
                     selectedFile === file._id ? "selected-file" : ""
                   }`}
                 >
-                  <Link to="/Workspace" className="typebotclick">
-                    <div className="formbottext">
-                      <img
-                        onClick={(e) => {
-                          e.stopPropagation(); // Prevent triggering file selection
-                          handledeletefile(file._id);
-                        }}
-                        src={delete1}
-                        alt=""
-                      />
-
-                      <p className="typebottext1">{file.filename}</p>
-
-                      {deleteFilePopup === file._id && (
-                        <div className="filedeleteform visible">
-                          <p className="foldersCreatetext">
-                            Are you sure you want to delete this file?
-                          </p>
-                          <div>
-                            <button
-                              className="done"
-                              onClick={() => {
-                                deleteFile(file._id);
-                                closeDeleteFilePopup();
-                              }}
-                            >
-                              Done
-                            </button>
-                            <button
-                              className="cancel"
-                              onClick={() => closeDeleteFilePopup()}
-                            >
-                              Cancel
-                            </button>
-                          </div>
+                  <div
+                    className="formbottext"
+                    onClick={() => gotoworkshop(file._id)}
+                  >
+                    <img
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent triggering file selection
+                        handledeletefile(file._id);
+                      }}
+                      src={delete1}
+                      alt=""
+                    />
+                    <p className="typebottext1">{file.filename}</p>
+                    {deleteFilePopup === file._id && (
+                      <div className="filedeleteform visible">
+                        <p className="foldersCreatetext">
+                          Are you sure you want to delete this file?
+                        </p>
+                        <div>
+                          <button
+                            className="done"
+                            onClick={() => {
+                              deleteFile(file._id);
+                              closeDeleteFilePopup();
+                            }}
+                          >
+                            Done
+                          </button>
+                          <button
+                            className="cancel"
+                            onClick={() => closeDeleteFilePopup()}
+                          >
+                            Cancel
+                          </button>
                         </div>
-                      )}
-                    </div>
-                  </Link>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </span>
             ))}
