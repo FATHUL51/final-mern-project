@@ -1,5 +1,7 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+import dotenv from "dotenv";
 import "./Workspace.css";
 import blue from "../assets/loginAssets/1toggle.svg";
 import blue1 from "../assets/loginAssets/Toggle.svg";
@@ -19,6 +21,8 @@ import flag from "../assets/bubbles/Vector (1).svg";
 import deletes from "../assets/delete.svg";
 
 const workspace = () => {
+  const { fileId } = useParams(); // Extract fileId from the route
+  const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const [isDark, setIsDark] = useState(false);
   const [isToggled, setIsToggled] = useState(false);
@@ -26,6 +30,18 @@ const workspace = () => {
   const [selected, setSelected] = useState("flow");
   const [close, setClose] = useState(false);
   const [addedComponents, setAddedComponents] = useState([]);
+  const [data, setData] = useState({
+    formname: "",
+    bubble: "",
+    text: "",
+    image: "",
+    number: "",
+    email: "",
+    phone: "",
+    rating: "",
+    button: "",
+  });
+  const [fileData, setFileData] = useState(null);
 
   const handleComponentClick = (componentName) => {
     setAddedComponents((prev) => [
@@ -39,11 +55,76 @@ const workspace = () => {
   };
 
   const handleInputChange = (id, value) => {
+    console.log(`Input Change: ID=${id}, Value=${value}`); // Log input changes
     setAddedComponents((prev) =>
       prev.map((comp) =>
         comp.id === id ? { ...comp, value, error: value.trim() === "" } : comp
       )
     );
+
+    const updatedComponent = addedComponents.find((comp) => comp.id === id);
+    if (updatedComponent) {
+      setData((prevData) => ({
+        ...prevData,
+        [updatedComponent.name.toLowerCase()]: value,
+      }));
+      console.log("Updated Data State:", {
+        ...data,
+        [updatedComponent.name.toLowerCase()]: value,
+      });
+    }
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+
+    if (!fileId) {
+      alert("File ID is missing.");
+      return;
+    }
+
+    const isValid = addedComponents.every((comp) => {
+      if (typeof comp.value !== "string") {
+        console.error(`Invalid value for component:`, comp);
+        return false;
+      }
+      return comp.value.trim() !== "";
+    });
+
+    if (!isValid) {
+      alert("Please fill all required fields.");
+      return;
+    }
+
+    // Build the data object with the file ID
+    const formattedData = {
+      file: fileId, // Include file ID
+      formname: data.formname || "", // Add formname explicitly
+    };
+
+    // Add dynamically generated fields
+    addedComponents.forEach((comp) => {
+      formattedData[comp.name.toLowerCase()] = comp.value;
+    });
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/user/folder/${fileId}/form`,
+        formattedData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (response.status === 201) {
+        alert("Form created successfully!");
+      }
+    } catch (error) {
+      console.error("Error creating form:", error);
+      alert("Failed to create the form.");
+    }
   };
 
   const handleBlur = (id, value) => {
@@ -57,6 +138,72 @@ const workspace = () => {
   const handleClick = (type) => {
     setSelected(type); // Set the clicked div as selected
   };
+
+  useEffect(() => {
+    const resetState = () => {
+      setData({
+        formname: "",
+        bubble: "",
+        text: "",
+        image: "",
+        number: "",
+        email: "",
+        phone: "",
+        rating: "",
+        button: "",
+      });
+      setAddedComponents([]);
+    };
+
+    resetState();
+    const fetchFileData = async () => {
+      try {
+        // Fetch form data from the backend
+        const response = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/user/folders/${fileId}/form`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        // Extract the first form from the array
+        const formData = response.data.form[0]; // Access the first element
+
+        if (formData) {
+          // Filter out unwanted keys
+          const allowedKeys = Object.keys(formData).filter(
+            (key) => !["_id", "__v", "file", "user"].includes(key)
+          );
+
+          // Set the `data` state with the filtered form data
+          const filteredData = {};
+          allowedKeys.forEach((key) => {
+            filteredData[key] = formData[key] || "";
+          });
+
+          setData(filteredData);
+
+          // Generate `addedComponents` dynamically from the filtered data
+          const components = allowedKeys.map((key) => ({
+            name: key.charAt(0).toUpperCase() + key.slice(1), // Capitalize the key
+            id: Date.now() + Math.random(), // Unique ID
+            value: formData[key],
+            error: !formData[key], // Mark as error if empty
+          }));
+
+          setAddedComponents(components);
+        } else {
+          console.error("Form data is empty or undefined.");
+        }
+      } catch (error) {
+        console.error("Error fetching file data:", error);
+      }
+    };
+
+    fetchFileData();
+  }, [fileId]);
 
   const handleclick = () => {
     setIsDark(!isDark);
@@ -181,11 +328,6 @@ const workspace = () => {
     }
   };
 
-  const handleSave = () => {
-    setIsSaved(true); // Enable the Share button after saving
-    console.log("Data saved!");
-  };
-
   const handleShare = () => {
     console.log("Data shared!");
   };
@@ -224,9 +366,19 @@ const workspace = () => {
         <div className="cont">
           <div className="inputtext">
             <input
+              id="formname"
+              value={data.formname || ""}
+              onChange={(e) => {
+                const newValue = e.target.value;
+                console.log("Formname Input Value:", newValue); // Debug log
+                setData((prevData) => ({
+                  ...prevData,
+                  formname: newValue,
+                }));
+              }}
               className="inputs"
               type="text"
-              placeholder="Enter Form Name"
+              placeholder={data.formname || "Enter Form Name"}
             />
           </div>
         </div>
@@ -390,7 +542,7 @@ const workspace = () => {
                     <input
                       className="inputs11"
                       type="text"
-                      value={comp.value}
+                      value={comp.value || ""}
                       placeholder={`Enter details for ${comp.name}`}
                       onChange={(e) =>
                         handleInputChange(comp.id, e.target.value)

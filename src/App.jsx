@@ -32,7 +32,7 @@ const App = () => {
           }
         />
         <Route
-          path="Workspace"
+          path="Workspace/:fileId"
           element={
             <UserProtectedWrapper>
               <Workspace />

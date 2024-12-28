@@ -26,6 +26,7 @@ const Home = () => {
   const [toggledown, setToggledown] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [createdFileId, setCreatedFileId] = useState(null);
 
   const token = localStorage.getItem("token");
 
@@ -85,15 +86,15 @@ const Home = () => {
       }
     }
   };
+  // State to store the file ID
+
   const submitform1 = async (e) => {
-    if (e && e.preventDefault) {
-      e.preventDefault(); // Prevent default only if e is provided
-    }
+    if (e && e.preventDefault) e.preventDefault();
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/user/folder/file`, // Ensure the API endpoint is correct
-        { filename }, // Use the foldername directly from the state
+        `${import.meta.env.VITE_BACKEND_URL}/api/user/folder/file`,
+        { filename },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -102,26 +103,21 @@ const Home = () => {
       );
 
       if (response.status === 201) {
-        // Check for success status code
-        fetchfile(); // Refresh the folder list after creation
-        alert("file created successfully");
+        const newFileId = response.data.file._id; // Assuming the backend returns the file ID
+        setCreatedFileId(newFileId); // Save the file ID
+        console.log("File created successfully. File ID:", newFileId);
+
+        fetchfile(); // Refresh file list
+        alert("File created successfully");
         setIsFolder1(false); // Close popup
         setFilename(""); // Reset input field
-        window.location.reload;
       }
     } catch (error) {
-      if (error.response) {
-        // Handle server-side error responses
-        alert(error.response.data.message || "Something went wrong!");
-      } else if (error.request) {
-        // Handle client-side or network errors
-        alert("No response from the server. Please try again later.");
-      } else {
-        // Handle unexpected errors
-        alert("An error occurred: " + error.message);
-      }
+      console.error("Error creating file:", error);
+      alert("Failed to create the file.");
     }
   };
+
   const fetchData = async () => {
     setLoading(true);
     setError(null);
@@ -227,7 +223,7 @@ const Home = () => {
     setSelectedFile(fileId === selectedFile ? null : fileId); // Toggle selection
   };
   const gotoworkshop = (fileId) => {
-    navigate(`/Workspace`);
+    navigate(`/Workspace/${fileId}`);
   };
 
   useEffect(() => {
@@ -446,7 +442,8 @@ const Home = () => {
                         <div>
                           <button
                             className="done"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent triggering parent click
                               deleteFile(file._id);
                               closeDeleteFilePopup();
                             }}
@@ -455,7 +452,10 @@ const Home = () => {
                           </button>
                           <button
                             className="cancel"
-                            onClick={() => closeDeleteFilePopup()}
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent triggering parent click
+                              closeDeleteFilePopup();
+                            }}
                           >
                             Cancel
                           </button>
