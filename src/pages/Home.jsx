@@ -8,6 +8,8 @@ import down from "../assets/loginAssets/Vector (1).svg";
 import createlogo from "../assets/SVG (1).svg";
 import delete1 from "../assets/delete.svg";
 import plusicon from "../assets/SVG (2).svg";
+import close from "../assets/loginAssets/close.svg";
+import ThemeToggle from "./themeChanger";
 
 const Home = () => {
   const [data, setData] = useState(null);
@@ -27,15 +29,16 @@ const Home = () => {
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [createdFileId, setCreatedFileId] = useState(null);
+  const [isSharePopupVisible, setIsSharePopupVisible] = useState(false);
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("edit");
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
-  const token = localStorage.getItem("token");
+  const toggleTheme = () => {
+    setIsDarkMode((prev) => !prev);
 
-  const navigate = useNavigate();
-
-  const handleclick = () => {
-    setIsDark(!isDark);
     const homeElement = document.querySelector(".home"); // Select the element
-    if (isDark) {
+    if (isDarkMode) {
       homeElement.style.backgroundColor = "black"; // Set background color
       homeElement.style.color = "white"; // Set text color
     } else {
@@ -43,6 +46,16 @@ const Home = () => {
       homeElement.style.color = "black";
     }
   };
+
+  // Handlers for showing and hiding the popup
+  const handleSharePopupOpen = () => setIsSharePopupVisible(true);
+  const handleSharePopupClose = () =>
+    setIsSharePopupVisible(!isSharePopupVisible);
+
+  const token = localStorage.getItem("token");
+
+  const navigate = useNavigate();
+
   const handlecreateclick = () => {
     setIsFolder((prev) => !prev);
   };
@@ -69,7 +82,7 @@ const Home = () => {
         // Check for success status code
         console.log("Folder created successfully:", response.data.folder);
         fetchform(); // Refresh the folder list after creation
-        alert("Folder created successfully");
+        // alert("Folder created successfully");
         setIsFolder(false); // Close popup
         setFoldername(""); // Reset input field
       }
@@ -108,7 +121,7 @@ const Home = () => {
         console.log("File created successfully. File ID:", newFileId);
 
         fetchfile(); // Refresh file list
-        alert("File created successfully");
+        // alert("File created successfully");
         setIsFolder1(false); // Close popup
         setFilename(""); // Reset input field
       }
@@ -145,15 +158,19 @@ const Home = () => {
   };
 
   const fetchfile = async () => {
-    const response = await axios.get(
-      `${import.meta.env.VITE_BACKEND_URL}/api/user/folders/file`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    setFileGetname(response.data.file);
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/user/folders/file`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setFileGetname(response.data.file);
+    } catch (error) {
+      console.error("Error fetching files:", error);
+    }
   };
 
   const deleteFolder = async (folderId) => {
@@ -167,7 +184,7 @@ const Home = () => {
         }
       );
 
-      alert(response.data.message); // Notify the user
+      // alert(response.data.message); // Notify the user
       fetchform(); // Refresh the folder list
     } catch (error) {
       console.error("Error deleting folder:", error);
@@ -175,6 +192,7 @@ const Home = () => {
     }
   };
   const deleteFile = async (fileId) => {
+    // console.log("Deleting file with ID:", fileId); // Debug log
     try {
       const response = await axios.delete(
         `${import.meta.env.VITE_BACKEND_URL}/api/user/file/${fileId}`,
@@ -185,14 +203,15 @@ const Home = () => {
         }
       );
 
-      alert(response.data.message); // Notify the user
-      fetchfile(); // Refresh the file list
-      window.location.reload;
+      console.log("Delete response:", response.data); // Debug log
+      alert(response.data.message);
+      fetchfile(); // Refresh file list
     } catch (error) {
       console.error("Error deleting file:", error);
       alert(error.response?.data?.message || "Failed to delete the file.");
     }
   };
+
   const handleDeleteFolderPopup = (folderId) => {
     setDeleteFolderPopup(folderId); // Set the popup visibility for the specific folder
   };
@@ -212,7 +231,7 @@ const Home = () => {
   };
   const handleLogout = async () => {
     localStorage.removeItem("token");
-    alert("logout sucessful");
+    // alert("logout sucessful");
     navigate("/Login");
     window.location.reload;
   };
@@ -225,6 +244,55 @@ const Home = () => {
   const gotoworkshop = (fileId) => {
     navigate(`/Workspace/${fileId}`);
   };
+  const handleShareLink = async (dashBoardId, role) => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/user/${dashBoardId}/shareLink`,
+        { role },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.status === 201) {
+        navigator.clipboard.writeText(response.data.sharingLink); // Copy link to clipboard
+        alert("Share Link copied to clipboard!");
+      }
+    } catch (error) {
+      console.error("Error creating share link:", error);
+      alert(error.response?.data?.message || "Failed to create share link.");
+    }
+  };
+
+  const handleShareEmail = async (dashBoardId, email, role) => {
+    if (!email || !role) {
+      alert("Please enter a valid email and select a role.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/api/user/${dashBoardId}/shareEmail`,
+        { email, role },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.status === 200) {
+        alert("Email shared successfully!");
+        setEmail(""); // Clear input field
+      }
+    } catch (error) {
+      console.error("Error sharing email:", error);
+      alert(error.response?.data?.message || "Failed to share via email.");
+    }
+  };
+  // const handleFolderClick = (folderId) => {
+  //   setSelectedFolder(folderId === selectedFolder ? null : folderId); // Toggle selection
+  // };
 
   useEffect(() => {
     fetchData();
@@ -275,21 +343,57 @@ const Home = () => {
         </div>
         <div className="toggle">
           <div className="light">Light</div>
-          <button
-            onClick={() => {
-              setIsToggled(!isToggled);
-              handleclick();
-            }}
-          >
-            {isDark ? (
-              <img src={blue1} alt="blue" />
-            ) : (
-              <img src={blue} alt="blue1" />
-            )}
-          </button>
+          <ThemeToggle isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
           <div className="dark">Dark</div>
         </div>
-        <button className="btn">Share</button>
+        <button className="btn" onClick={handleSharePopupOpen}>
+          Share
+        </button>
+
+        {isSharePopupVisible && (
+          <div className="sharecont">
+            <img
+              className="close"
+              src={close}
+              alt="Close"
+              onClick={handleSharePopupClose}
+            />
+            {/* Email Sharing */}
+            <div className="emailcont">
+              <p className="emailinv">Invite by Email</p>
+              <select
+                className="dd"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+              >
+                <option value="edit">Edit</option>
+                <option value="view">View</option>
+              </select>
+            </div>
+            <input
+              type="email"
+              className="inputs1"
+              value={email}
+              placeholder="Enter email Id"
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <button
+              className="copy"
+              onClick={() => handleShareEmail(selectedFolder, email, role)}
+            >
+              Send Invite
+            </button>
+
+            {/* Link Sharing */}
+            <p className="linkinv">Invite by link</p>
+            <button
+              className="copy1"
+              onClick={() => handleShareLink(selectedFolder, role)}
+            >
+              Copy link
+            </button>
+          </div>
+        )}
       </div>
       <hr />
       <div className="folder">

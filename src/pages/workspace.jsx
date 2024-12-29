@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import dotenv from "dotenv";
 import "./Workspace.css";
+import ThemeToggle from "./themeChanger";
 import blue from "../assets/loginAssets/1toggle.svg";
 import blue1 from "../assets/loginAssets/Toggle.svg";
 import closed from "../assets/loginAssets/close.svg";
@@ -24,9 +25,6 @@ const workspace = () => {
   const { fileId } = useParams(); // Extract fileId from the route
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
-  const [isDark, setIsDark] = useState(false);
-  const [isToggled, setIsToggled] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
   const [selected, setSelected] = useState("flow");
   const [close, setClose] = useState(false);
   const [addedComponents, setAddedComponents] = useState([]);
@@ -42,7 +40,140 @@ const workspace = () => {
     date: "",
     button: "",
   });
-  const [fileData, setFileData] = useState(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isShareEnabled, setIsShareEnabled] = useState(false);
+  const [isSharePopupVisible, setIsSharePopupVisible] = useState(false);
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("edit");
+  const [selectedFolder, setSelectedFolder] = useState(null);
+
+  const handleSave1 = () => {
+    setIsShareEnabled(true); // Enable the Share button
+  };
+
+  const toggleTheme = () => {
+    setIsDarkMode((prev) => !prev);
+
+    const homeElement = document.querySelector(".header");
+    const hrdown = document.querySelector(".cona");
+    const elem = document.querySelector(".hrcontainer");
+    const inputss = document.querySelector(".inputs");
+    const bubblesd = document.querySelectorAll(".content");
+    const bubbles1 = document.querySelectorAll(".contents");
+    const bubbles2 = document.querySelectorAll(".contents1");
+    const inputs1 = document.querySelectorAll(".inputs11");
+
+    if (homeElement) {
+      if (isDarkMode) {
+        homeElement.style.backgroundColor = "#18181b";
+        homeElement.style.color = "white";
+      } else {
+        homeElement.style.backgroundColor = "white";
+        homeElement.style.color = "black";
+      }
+    } else {
+      console.warn("Element with class 'home' not found.");
+    }
+    if (hrdown) {
+      if (isDarkMode) {
+        hrdown.style.backgroundColor = "#282c34";
+        hrdown.style.color = "white";
+      } else {
+        hrdown.style.backgroundColor = "white";
+        hrdown.style.color = "black";
+      }
+    } else {
+      console.warn("Element with class 'home' not found.");
+    }
+
+    if (inputss) {
+      if (isDarkMode) {
+        inputss.style.backgroundColor = "#282c34";
+        inputss.style.color = "white"; // You might want to change text color for visibility
+      } else {
+        inputss.style.backgroundColor = "transparent";
+        inputss.style.border = "solid 1px #282c34";
+        inputss.style.borderRadius = "0.4rem";
+        inputss.style.color = "black";
+      }
+    } else {
+      console.warn("Element with class 'inputs' not found.");
+    }
+    if (elem) {
+      if (isDarkMode) {
+        elem.style.backgroundColor = "#18181b";
+        elem.style.color = "white"; // You might want to change text color for visibility
+      } else {
+        elem.style.backgroundColor = "transparent";
+        elem.style.border = "solid 1px #282c34";
+        elem.style.borderRadius = "0.4rem";
+        elem.style.color = "black";
+      }
+    } else {
+      console.warn("Element with class 'inputs' not found.");
+    }
+
+    if (bubblesd) {
+      bubblesd.forEach((bubble) => {
+        if (isDarkMode) {
+          bubble.style.backgroundColor = "#282c34";
+          bubble.style.color = "white";
+        } else {
+          bubble.style.backgroundColor = "transparent";
+          bubble.style.color = "black";
+          bubble.style.border = "solid 1px #282c34";
+          bubble.style.borderRadius = "0.4rem";
+        }
+      });
+    } else {
+      console.warn("Elements with class 'content' not found.");
+    }
+    if (bubbles2) {
+      bubbles2.forEach((bubble) => {
+        if (isDarkMode) {
+          bubble.style.backgroundColor = "#18181b";
+          bubble.style.color = "white";
+        } else {
+          bubble.style.backgroundColor = "transparent";
+          bubble.style.color = "black";
+          bubble.style.border = "solid 1px #282c34";
+          bubble.style.borderRadius = "0.4rem";
+        }
+      });
+    } else {
+      console.warn("Elements with class 'content' not found.");
+    }
+    if (bubbles1) {
+      bubbles1.forEach((bubble) => {
+        if (isDarkMode) {
+          bubble.style.backgroundColor = "#18181b";
+          bubble.style.color = "white";
+        } else {
+          bubble.style.backgroundColor = "transparent";
+          bubble.style.color = "black";
+          bubble.style.border = "solid 1px #282c34";
+          bubble.style.borderRadius = "0.4rem";
+        }
+      });
+    } else {
+      console.warn("Elements with class 'content' not found.");
+    }
+    if (inputs1.length > 0) {
+      inputs1.forEach((input) => {
+        if (isDarkMode) {
+          input.style.backgroundColor = "#282c34";
+          input.style.color = "white";
+        } else {
+          input.style.backgroundColor = "transparent";
+          input.style.border = "solid 1px #282c34";
+          input.style.borderRadius = "0.4rem";
+          input.style.color = "black";
+        }
+      });
+    } else {
+      console.warn("Elements with class 'inputs11' not found.");
+    }
+  };
 
   const handleComponentClick = (componentName) => {
     setAddedComponents((prev) => [
@@ -51,8 +182,41 @@ const workspace = () => {
     ]); // Add component with unique ID and validation state
   };
 
-  const handleDeleteComponent = (id) => {
-    setAddedComponents((prev) => prev.filter((comp) => comp.id !== id));
+  const handleDeleteComponent = async (componentName) => {
+    try {
+      // console.log("Deleting component:", componentName);
+
+      if (!fileId) {
+        alert("File ID is missing.");
+        return;
+      }
+
+      // Make the API call to delete the component
+      const response = await axios.delete(
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/api/user/folders/${fileId}/form/${componentName}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        // Update the state to remove the deleted component from the UI
+        setAddedComponents((prev) =>
+          prev.filter(
+            (component) => component.name.toLowerCase() !== componentName
+          )
+        );
+        // alert("Component deleted successfully.");
+      } else {
+        alert(response.data.message || "Failed to delete the component.");
+      }
+    } catch (error) {
+      alert("Failed to delete the component.", error);
+    }
   };
 
   const handleInputChange = (id, value) => {
@@ -141,28 +305,60 @@ const workspace = () => {
   const handleClick = (type) => {
     setSelected(type); // Set the clicked div as selected
   };
+  const handleShareLink = async (dashBoardId, role) => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/user/${dashBoardId}/shareLink`,
+        { role },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.status === 201) {
+        navigator.clipboard.writeText(response.data.sharingLink); // Copy link to clipboard
+        alert("Share Link copied to clipboard!");
+      }
+    } catch (error) {
+      console.error("Error creating share link:", error);
+      alert(error.response?.data?.message || "Failed to create share link.");
+    }
+  };
+
+  const handleShareEmail = async (dashBoardId, email, role) => {
+    if (!email || !role) {
+      alert("Please enter a valid email and select a role.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/api/user/${dashBoardId}/shareEmail`,
+        { email, role },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.status === 200) {
+        alert("Email shared successfully!");
+        setEmail(""); // Clear input field
+      }
+    } catch (error) {
+      console.error("Error sharing email:", error);
+      alert(error.response?.data?.message || "Failed to share via email.");
+    }
+  };
+
+  const handleSharePopupOpen = () => setIsSharePopupVisible(true);
+  const handleSharePopupClose = () =>
+    setIsSharePopupVisible(!isSharePopupVisible);
 
   useEffect(() => {
-    const resetState = () => {
-      setData({
-        formname: "",
-        bubble_text: "",
-        text: "",
-        image: "",
-        number: "",
-        email: "",
-        phone: "",
-        rating: "",
-        date: "",
-        button: "",
-      });
-      setAddedComponents([]);
-    };
-
-    resetState();
     const fetchFileData = async () => {
       try {
-        // Fetch form data from the backend
         const response = await axios.get(
           `${import.meta.env.VITE_BACKEND_URL}/api/user/folders/${fileId}/form`,
           {
@@ -172,16 +368,22 @@ const workspace = () => {
           }
         );
 
-        // Extract the first form from the array
-        const formData = response.data.form[0]; // Access the first element
+        const formData = response.data.form;
 
         if (formData) {
-          // Filter out unwanted keys
+          // Filter out system keys and prepare the form data
           const allowedKeys = Object.keys(formData).filter(
-            (key) => !["_id", "__v", "file", "user"].includes(key)
+            (key) =>
+              ![
+                "_id",
+                "__v",
+                "file",
+                "user",
+                "createdAt",
+                "updatedAt",
+              ].includes(key)
           );
 
-          // Set the `data` state with the filtered form data
           const filteredData = {};
           allowedKeys.forEach((key) => {
             filteredData[key] = formData[key] || "";
@@ -195,152 +397,31 @@ const workspace = () => {
 
           setData(filteredData);
 
-          // Generate `addedComponents` dynamically from the filtered data
+          // Map the form fields to `addedComponents`
           const components = allowedKeys.map((key) => ({
-            name: key.charAt(0).toUpperCase() + key.slice(1), // Capitalize the key
-            id: Date.now() + Math.random(), // Unique ID
+            name: key.charAt(0).toUpperCase() + key.slice(1),
+            id: Date.now() + Math.random(),
             value: formData[key],
-            error: !formData[key], // Mark as error if empty
+            error: !formData[key],
           }));
 
           setAddedComponents(components);
         } else {
-          console.error("Form data is empty or undefined.");
+          console.error("No form data available.");
         }
       } catch (error) {
-        console.error("Error fetching file data:", error);
+        if (error.response?.status === 404) {
+          console.error("No form found for this file ID.");
+          alert("No form available for the provided file ID.");
+        } else {
+          console.error("Error fetching file data:", error);
+        }
       }
     };
 
     fetchFileData();
   }, [fileId]);
 
-  const handleclick = () => {
-    setIsDark(!isDark);
-    const homeElement = document.querySelector(".header");
-    const hrdown = document.querySelector(".cona");
-    const elem = document.querySelector(".hrcontainer");
-    const inputss = document.querySelector(".inputs");
-    const bubblesd = document.querySelectorAll(".content");
-    const bubbles1 = document.querySelectorAll(".contents");
-    const bubbles2 = document.querySelectorAll(".contents1");
-    const inputs1 = document.querySelectorAll(".inputs11");
-
-    if (homeElement) {
-      if (isDark) {
-        homeElement.style.backgroundColor = "#18181b";
-        homeElement.style.color = "white";
-      } else {
-        homeElement.style.backgroundColor = "white";
-        homeElement.style.color = "black";
-      }
-    } else {
-      console.warn("Element with class 'home' not found.");
-    }
-    if (hrdown) {
-      if (isDark) {
-        hrdown.style.backgroundColor = "#282c34";
-        hrdown.style.color = "white";
-      } else {
-        hrdown.style.backgroundColor = "white";
-        hrdown.style.color = "black";
-      }
-    } else {
-      console.warn("Element with class 'home' not found.");
-    }
-
-    if (inputss) {
-      if (isDark) {
-        inputss.style.backgroundColor = "#282c34";
-        inputss.style.color = "white"; // You might want to change text color for visibility
-      } else {
-        inputss.style.backgroundColor = "transparent";
-        inputss.style.border = "solid 1px #282c34";
-        inputss.style.borderRadius = "0.4rem";
-        inputss.style.color = "black";
-      }
-    } else {
-      console.warn("Element with class 'inputs' not found.");
-    }
-    if (elem) {
-      if (isDark) {
-        elem.style.backgroundColor = "#18181b";
-        elem.style.color = "white"; // You might want to change text color for visibility
-      } else {
-        elem.style.backgroundColor = "transparent";
-        elem.style.border = "solid 1px #282c34";
-        elem.style.borderRadius = "0.4rem";
-        elem.style.color = "black";
-      }
-    } else {
-      console.warn("Element with class 'inputs' not found.");
-    }
-
-    if (bubblesd) {
-      bubblesd.forEach((bubble) => {
-        if (isDark) {
-          bubble.style.backgroundColor = "#282c34";
-          bubble.style.color = "white";
-        } else {
-          bubble.style.backgroundColor = "transparent";
-          bubble.style.color = "black";
-          bubble.style.border = "solid 1px #282c34";
-          bubble.style.borderRadius = "0.4rem";
-        }
-      });
-    } else {
-      console.warn("Elements with class 'content' not found.");
-    }
-    if (bubbles2) {
-      bubbles2.forEach((bubble) => {
-        if (isDark) {
-          bubble.style.backgroundColor = "#18181b";
-          bubble.style.color = "white";
-        } else {
-          bubble.style.backgroundColor = "transparent";
-          bubble.style.color = "black";
-          bubble.style.border = "solid 1px #282c34";
-          bubble.style.borderRadius = "0.4rem";
-        }
-      });
-    } else {
-      console.warn("Elements with class 'content' not found.");
-    }
-    if (bubbles1) {
-      bubbles1.forEach((bubble) => {
-        if (isDark) {
-          bubble.style.backgroundColor = "#18181b";
-          bubble.style.color = "white";
-        } else {
-          bubble.style.backgroundColor = "transparent";
-          bubble.style.color = "black";
-          bubble.style.border = "solid 1px #282c34";
-          bubble.style.borderRadius = "0.4rem";
-        }
-      });
-    } else {
-      console.warn("Elements with class 'content' not found.");
-    }
-    if (inputs1.length > 0) {
-      inputs1.forEach((input) => {
-        if (isDark) {
-          input.style.backgroundColor = "#282c34";
-          input.style.color = "white";
-        } else {
-          input.style.backgroundColor = "transparent";
-          input.style.border = "solid 1px #282c34";
-          input.style.borderRadius = "0.4rem";
-          input.style.color = "black";
-        }
-      });
-    } else {
-      console.warn("Elements with class 'inputs11' not found.");
-    }
-  };
-
-  const handleShare = () => {
-    console.log("Data shared!");
-  };
   const handleclose = () => {
     setClose(true);
     if (close == true) {
@@ -388,35 +469,79 @@ const workspace = () => {
           <div className="t">
             <div className="toggle">
               <div className="light">Light</div>
-              <button
+              <ThemeToggle
+                isDarkMode={isDarkMode}
+                toggleTheme={toggleTheme}
                 onClick={() => {
-                  setIsToggled(!isToggled);
-                  handleclick();
+                  setIsDarkMode(!isDarkMode);
                 }}
-              >
-                {isDark ? (
-                  <img src={blue1} alt="blue" />
-                ) : (
-                  <img src={blue} alt="blue1" />
-                )}
-              </button>
+              />
               <div className="dark">Dark</div>
             </div>
           </div>
           <div className="savenshare">
             <button
               className="btn"
-              onClick={handleShare}
-              disabled={!isSaved}
+              disabled={!isShareEnabled}
               style={{
-                backgroundColor: isSaved ? "#1a5fff" : "#848890",
-                cursor: isSaved ? "pointer" : "not-allowed",
+                backgroundColor: isShareEnabled ? "#1a5fff" : "#848890",
+                cursor: isShareEnabled ? "pointer" : "not-allowed",
                 color: "white",
               }}
             >
               Share
             </button>
-            <button className="btn1" onClick={handleSave}>
+            {isSharePopupVisible && (
+              <div className="sharecont">
+                <img
+                  className="close"
+                  src={close}
+                  alt="Close"
+                  onClick={handleSharePopupClose}
+                />
+                {/* Email Sharing */}
+                <div className="emailcont">
+                  <p className="emailinv">Invite by Email</p>
+                  <select
+                    className="dd"
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                  >
+                    <option value="edit">Edit</option>
+                    <option value="view">View</option>
+                  </select>
+                </div>
+                <input
+                  type="email"
+                  className="inputs1"
+                  value={email}
+                  placeholder="Enter email Id"
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <button
+                  className="copy"
+                  onClick={() => handleShareEmail(email)}
+                >
+                  Send Invite
+                </button>
+
+                {/* Link Sharing */}
+                <p className="linkinv">Invite by link</p>
+                <button
+                  className="copy1"
+                  onClick={() => handleShareLink(selectedFolder, role)}
+                >
+                  Copy link
+                </button>
+              </div>
+            )}
+            <button
+              className="btn1"
+              onClick={(e) => {
+                handleSave(e);
+                handleSave1();
+              }}
+            >
               Save
             </button>
           </div>
@@ -513,7 +638,7 @@ const workspace = () => {
           </div>
           <div className="allinputs">
             <div className="contents">
-              <img src={flag} alt="" />
+              <img src={flag} alt="" className="list" />
               Start
             </div>
             <div className="allinputs1">
@@ -552,9 +677,11 @@ const workspace = () => {
                       )}
                       <img
                         className="delete"
-                        src={deletes} // Replace with the correct delete icon
+                        src={deletes}
                         alt="Delete"
-                        onClick={() => handleDeleteComponent(comp.id)}
+                        onClick={() =>
+                          handleDeleteComponent(comp.name.toLowerCase())
+                        } // Use name instead of id
                       />
                     </div>
                   );

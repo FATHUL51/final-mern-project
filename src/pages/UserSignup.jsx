@@ -51,7 +51,7 @@ const UserSignup = () => {
         const data = response.data;
         setUser(data.user);
         localStorage.setItem("token", data.token);
-        alert("User created successfully");
+        // alert("User created successfully");
         navigate("/Login");
       }
     } catch (error) {

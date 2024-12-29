@@ -33,7 +33,7 @@ const UserLogin = () => {
         const data = responce.data;
         setUser(data.user);
         localStorage.setItem("token", data.token);
-        alert("Login successful");
+        // alert("Login successful");
         navigate("/home");
         //to hide credentials from frontend
         window.location.reload();
