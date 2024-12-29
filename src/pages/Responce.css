@@ -1,6 +1,7 @@
 .body{
     height: 100vh;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: scroll;
     .letssee{
         font-family: "Inter";
         font-size: 2rem;
@@ -12,3 +13,101 @@
         align-items: center;
     }
 }
+.workspace {
+    background-color: transparent;
+    padding: 20px;
+    height: 100%;
+  }
+  
+  .stats-container {
+    display: flex;
+    justify-content: center;
+    gap:15rem;
+    margin-top: 6rem;
+    margin-bottom: 6rem;
+  }
+  
+  .stat {
+    background: #333;
+    padding: 2rem;
+    border-radius: 1rem;
+    width: 12rem;
+    font-size: 2.5rem;
+    text-align: start;
+    color: #fff;
+  }
+  
+  .stat span {
+    display: block;
+    font-size: 2rem;
+    font-weight: bold;
+  }
+  
+  .table-container {
+    overflow: auto;
+    margin-bottom: 10rem;
+    width: 80rem;
+    margin: 10rem auto;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
+    border: 1px solid #444;
+  }
+  
+  th, td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #444;
+  }
+  
+  th {
+    background: transparent;
+  }
+  
+  
+  .completion-chart {
+    position: relative;
+    width: 20rem;
+    margin: 0 0 0 20rem;
+  }
+  
+  .chart-overlay {
+    position: absolute;
+    top: 30%;
+    left: 150%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  
+  .completed-count {
+    font-size: 15px;
+    font-weight: bold;
+  }
+  
+  .completion-rate {
+    font-size: 15px;
+    margin-top: 8px;
+  }
+  .rate1{
+    display: flex;
+    position: absolute;
+    bottom: 6rem;
+    left: 35rem;
+    background-color: #2e2e3e;
+    width: 12rem;
+    height: 4rem;
+    padding: 2em;
+    border: none;
+    border-radius: 0.8rem;
+    justify-content: center;
+    justify-items: center;
+    align-items: center;
+  }
+  .completion-rate1{
+    font-size: 1.5rem;
+    color: #fff;
+  }
+  

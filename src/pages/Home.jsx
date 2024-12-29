@@ -32,10 +32,17 @@ const Home = () => {
   const [isSharePopupVisible, setIsSharePopupVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("edit");
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem("theme") === "dark";
+  });
 
   const toggleTheme = () => {
-    setIsDarkMode((prev) => !prev);
+    setIsDarkMode((prev) => {
+      const newTheme = !prev ? "dark" : "light";
+      localStorage.setItem("theme", newTheme);
+      document.documentElement.setAttribute("data-theme", newTheme);
+      return !prev;
+    });
 
     const homeElement = document.querySelector(".home"); // Select the element
     if (isDarkMode) {

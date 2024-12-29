@@ -40,20 +40,28 @@ const workspace = () => {
     date: "",
     button: "",
   });
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [isShareEnabled, setIsShareEnabled] = useState(false);
   const [isSharePopupVisible, setIsSharePopupVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("edit");
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [isSaved, setIsSaved] = useState(false);
+  const [isDataAvailable, setIsDataAvailable] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem("theme") === "dark";
+  });
 
   const handleSave1 = () => {
     setIsShareEnabled(true); // Enable the Share button
   };
 
   const toggleTheme = () => {
-    setIsDarkMode((prev) => !prev);
+    setIsDarkMode((prev) => {
+      const newTheme = !prev ? "dark" : "light";
+      localStorage.setItem("theme", newTheme);
+      document.documentElement.setAttribute("data-theme", newTheme);
+      return !prev;
+    });
 
     const homeElement = document.querySelector(".header");
     const hrdown = document.querySelector(".cona");
@@ -320,7 +328,7 @@ const workspace = () => {
 
       // Navigate to the response route and pass save state
       navigate(`/Workspace/${fileId}/response/${fileId}`, {
-        state: { isSaved }, // Pass save status
+        state: { isDataAvailable }, // Pass data availability status
       });
     }
   };
@@ -389,6 +397,12 @@ const workspace = () => {
         );
 
         const formData = response.data.form;
+
+        if (formData && Object.keys(formData).length > 0) {
+          setIsDataAvailable(true); // Data is available
+        } else {
+          setIsDataAvailable(false);
+        }
 
         if (formData) {
           // Filter out system keys and prepare the form data

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import ThemeToggle from "./themeChanger";
+import { Doughnut } from "react-chartjs-2";
+import { Chart, ArcElement } from "chart.js";
+Chart.register(ArcElement);
 import axios from "axios";
 import closed from "../assets/loginAssets/close.svg";
 import "./Responce.css";
@@ -10,7 +13,7 @@ const Response = () => {
   const { formId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const isSaved = location.state?.isSaved;
+  const isDataAvailable = location.state?.isDataAvailable || false;
   const [isShareEnabled, setIsShareEnabled] = useState(false);
   const [isSharePopupVisible, setIsSharePopupVisible] = useState(false);
   const [email, setEmail] = useState("");
@@ -18,7 +21,13 @@ const Response = () => {
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [close, setClose] = useState(false);
   const [selected, setSelected] = useState("res");
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem("theme") === "dark";
+  });
+  const [data, setData] = useState([]);
+  const [views, setViews] = useState(0);
+  const [starts, setStarts] = useState(0);
+  const [completion, setCompletion] = useState(0);
 
   const handleClick = (type) => {
     if (type === "flow") {
@@ -92,10 +101,16 @@ const Response = () => {
   };
 
   const toggleTheme = () => {
-    setIsDarkMode((prev) => !prev);
+    setIsDarkMode((prev) => {
+      const newTheme = !prev ? "dark" : "light";
+      localStorage.setItem("theme", newTheme);
+      document.documentElement.setAttribute("data-theme", newTheme);
+      return !prev;
+    });
 
     const homeElement = document.querySelector(".header");
     const homeElement1 = document.querySelector(".body");
+    const homeElement2 = document.querySelector(".body1");
 
     if (homeElement) {
       if (isDarkMode) {
@@ -119,6 +134,17 @@ const Response = () => {
     } else {
       console.warn("Element with class 'home' not found.");
     }
+    if (homeElement2) {
+      if (isDarkMode) {
+        homeElement2.style.backgroundColor = "#18181b";
+        homeElement2.style.color = "white";
+      } else {
+        homeElement2.style.backgroundColor = "white";
+        homeElement2.style.color = "black";
+      }
+    } else {
+      console.warn("Element with class 'home' not found.");
+    }
   };
   const handleclose = () => {
     setClose(true);
@@ -126,6 +152,54 @@ const Response = () => {
       navigate("/home");
     }
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // Replace this with actual backend call
+      const response = {
+        data: [
+          {
+            date: "Jul 17, 03:23 PM",
+            button1: "Hi!",
+            email: "abc@g.com",
+            text: "alpha",
+            button2: "Studio App",
+            rating: 5,
+          },
+          {
+            date: "Jul 17, 02:48 PM",
+            button1: "Hi!",
+            email: "",
+            text: "",
+            button2: "",
+            rating: 3,
+          },
+        ],
+        stats: { views: 6, starts: 100, completed: 33 },
+      };
+
+      setData(response.data);
+      setViews(response.stats.views);
+      setStarts(response.stats.starts);
+      setCompletion(response.stats.completed);
+    };
+
+    fetchData();
+  }, []);
+
+  const completionRate = starts ? Math.round((completion / starts) * 100) : 0;
+
+  const chartData = {
+    labels: ["Completed", "Remaining"],
+    datasets: [
+      {
+        data: [completion, starts - completion],
+        backgroundColor: ["#007BFF", "#D3D3D3"],
+        borderWidth: 1,
+      },
+    ],
+  };
+
   return (
     <div className="body">
       <div className="header">
@@ -154,10 +228,9 @@ const Response = () => {
             {/* Share Button */}
             <button
               className="btn"
-              disabled={!isShareEnabled}
               style={{
-                backgroundColor: isShareEnabled ? "#1a5fff" : "#848890",
-                cursor: isShareEnabled ? "pointer" : "not-allowed",
+                backgroundColor: "#1a5fff",
+                cursor: "pointer",
                 color: "white",
               }}
               onClick={handleSharePopupOpen} // Open the share popup on click
@@ -232,9 +305,56 @@ const Response = () => {
         </div>
       </div>
       <hr />
-      {isSaved ? (
-        <div className="body">
-          <p>Displaying results for Form ID: {formId}</p>
+      {isDataAvailable ? (
+        <div className="body1">
+          <div className="workspace">
+            <div className="stats-container">
+              <div className="stat">
+                Views <span>{views}</span>
+              </div>
+              <div className="stat">
+                Starts <span>{starts}</span>
+              </div>
+            </div>
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Submitted At</th>
+                    <th>Button 1</th>
+                    <th>Email</th>
+                    <th>Text</th>
+                    <th>Button 2</th>
+                    <th>Rating</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.map((row, index) => (
+                    <tr key={index}>
+                      <td>{row.date}</td>
+                      <td>{row.button1}</td>
+                      <td>{row.email || "-"}</td>
+                      <td>{row.text || "-"}</td>
+                      <td>{row.button2 || "-"}</td>
+                      <td>{row.rating || "-"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="completion-chart">
+              <Doughnut data={chartData} key={JSON.stringify(chartData)} />
+              <div className="chart-overlay">
+                <div className="completed-count">Completed</div>
+                <div className="completion-rate">{completion}</div>
+              </div>
+              <div className="rate1">
+                <div className="completion-rate1">
+                  {`completionRate ${completionRate}`}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="body">
