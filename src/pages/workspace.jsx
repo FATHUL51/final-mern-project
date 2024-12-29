@@ -466,20 +466,8 @@ const workspace = () => {
           </div>
         </div>
         <div className="buttonshare">
-          <div className="t">
-            <div className="toggle">
-              <div className="light">Light</div>
-              <ThemeToggle
-                isDarkMode={isDarkMode}
-                toggleTheme={toggleTheme}
-                onClick={() => {
-                  setIsDarkMode(!isDarkMode);
-                }}
-              />
-              <div className="dark">Dark</div>
-            </div>
-          </div>
           <div className="savenshare">
+            {/* Share Button */}
             <button
               className="btn"
               disabled={!isShareEnabled}
@@ -488,14 +476,17 @@ const workspace = () => {
                 cursor: isShareEnabled ? "pointer" : "not-allowed",
                 color: "white",
               }}
+              onClick={handleSharePopupOpen} // Open the share popup on click
             >
               Share
             </button>
+
+            {/* Share Popup */}
             {isSharePopupVisible && (
               <div className="sharecont">
                 <img
                   className="close"
-                  src={close}
+                  src={closed}
                   alt="Close"
                   onClick={handleSharePopupClose}
                 />
@@ -520,7 +511,7 @@ const workspace = () => {
                 />
                 <button
                   className="copy"
-                  onClick={() => handleShareEmail(email)}
+                  onClick={() => handleShareEmail(selectedFolder, email, role)}
                 >
                   Send Invite
                 </button>
@@ -535,11 +526,13 @@ const workspace = () => {
                 </button>
               </div>
             )}
+
+            {/* Save Button */}
             <button
               className="btn1"
               onClick={(e) => {
                 handleSave(e);
-                handleSave1();
+                handleSave1(); // Enable the Share button
               }}
             >
               Save
