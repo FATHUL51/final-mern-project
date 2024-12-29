@@ -7,6 +7,7 @@ import UserProtectedWrapper from "./pages/UserProtectedWrapper";
 import Home from "./pages/Home";
 import Setting from "./pages/Setting";
 import Workspace from "./pages/workspace";
+import Response from "./pages/Responce";
 
 const App = () => {
   return (
@@ -36,6 +37,14 @@ const App = () => {
           element={
             <UserProtectedWrapper>
               <Workspace />
+            </UserProtectedWrapper>
+          }
+        />
+        <Route
+          path="/Workspace/:fileId/response/:formId"
+          element={
+            <UserProtectedWrapper>
+              <Response />
             </UserProtectedWrapper>
           }
         />

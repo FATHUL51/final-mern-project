@@ -46,6 +46,7 @@ const workspace = () => {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("edit");
   const [selectedFolder, setSelectedFolder] = useState(null);
+  const [isSaved, setIsSaved] = useState(false);
 
   const handleSave1 = () => {
     setIsShareEnabled(true); // Enable the Share button
@@ -243,6 +244,14 @@ const workspace = () => {
   const handleSave = async (e) => {
     e.preventDefault();
 
+    try {
+      // Simulate form save
+      setIsSaved(true); // Mark as saved
+      alert("Form saved successfully!");
+    } catch (error) {
+      console.error("Error saving form:", error);
+    }
+
     if (!fileId) {
       alert("File ID is missing.");
       return;
@@ -303,8 +312,19 @@ const workspace = () => {
   };
 
   const handleClick = (type) => {
-    setSelected(type); // Set the clicked div as selected
+    if (type === "res") {
+      if (!fileId) {
+        alert("Form ID is missing.");
+        return;
+      }
+
+      // Navigate to the response route and pass save state
+      navigate(`/Workspace/${fileId}/response/${fileId}`, {
+        state: { isSaved }, // Pass save status
+      });
+    }
   };
+
   const handleShareLink = async (dashBoardId, role) => {
     try {
       const response = await axios.post(
@@ -464,6 +484,11 @@ const workspace = () => {
           >
             Response
           </div>
+        </div>
+        <div className="toggle">
+          <div className="light">Light</div>
+          <ThemeToggle isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
+          <div className="dark">Dark</div>
         </div>
         <div className="buttonshare">
           <div className="savenshare">

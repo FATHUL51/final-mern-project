@@ -204,7 +204,7 @@ const Home = () => {
       );
 
       console.log("Delete response:", response.data); // Debug log
-      alert(response.data.message);
+      // alert(response.data.message);
       fetchfile(); // Refresh file list
     } catch (error) {
       console.error("Error deleting file:", error);
