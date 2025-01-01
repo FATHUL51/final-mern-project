@@ -1,0 +1,136 @@
+/* Formbot container styling
+body{
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f9f9f9;
+  height: 100vh;
+} */
+.formbot-container {
+  display: flex;
+  flex-direction: column;
+  height: 90vh;
+  overflow: hidden;
+  background-color: #f9f9f9;
+  padding: 2rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Add a shadow for better appearance */
+}
+
+/* Chat window styles */
+.chat-window {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Chat message styles */
+.chat-message {
+  /* max-width: 70%; */
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+/* Bot messages */
+.chat-message.bot {
+  background-color: #053ec4 ;
+  color: #e0f7fa;
+  align-self: flex-start;
+}
+
+/* User messages */
+.chat-message.user {
+  background-color: #ff8321;
+  color: #e0f7fa;
+  align-self: flex-end;
+}
+
+/* Image messages */
+.chat-message img {
+  max-width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* send button styles */
+.imgs{
+  width: 2rem;
+}
+/* chat-input container */
+.chat-input-container{
+  display: flex;
+  width: 100%;
+  justify-content: end;
+}
+/* Chat input container */
+.chat-input {
+  display: flex;
+  width: 40%;
+  border-top: 1px solid #e0e0e0;
+  background-color: #fff;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: end;
+}
+
+
+/* Input field styles */
+.chat-input input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  height: 2.5rem;
+  font-size: 14px;
+  outline: none;
+}
+
+.chat-input input:focus {
+  border-color: #00796b;
+}
+
+/* Send button styles */
+.chat-input button {
+  padding: 10px 16px;
+  background-color: #053ec4;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.chat-input button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+@media (max-width: 768px) {
+  .chat-input {
+    width: 100%;
+  }
+  
+}
+.rating-input{
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  border-radius: 100%;
+  border: none;
+}
+.container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 100rem;
+  background-color: #f5f5f5;
+}
+.imgs{
+  width: 4rem;
+}

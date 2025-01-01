@@ -175,11 +175,12 @@
 .contents{
     display: flex;
     flex-direction: row;
-    width: 13rem;
+    width: 14rem;
     gap:10px;
     background-color: #18181b;
     color: #fff;
     padding: 10px;
+    border: none;
     border-radius: 0.4rem;
     justify-items: center;
     font-weight: 600;

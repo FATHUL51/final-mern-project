@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Setting from "./pages/Setting";
 import Workspace from "./pages/workspace";
 import Response from "./pages/Responce";
+import Formbots from "./pages/Formbot";
 
 const App = () => {
   return (
@@ -48,6 +49,7 @@ const App = () => {
             </UserProtectedWrapper>
           }
         />
+        <Route path="/Formbot/:fileId" element={<Formbots />} />
       </Routes>
     </div>
   );

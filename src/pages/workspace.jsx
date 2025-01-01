@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import dotenv from "dotenv";
 import "./Workspace.css";
 import ThemeToggle from "./themeChanger";
-import blue from "../assets/loginAssets/1toggle.svg";
-import blue1 from "../assets/loginAssets/Toggle.svg";
 import closed from "../assets/loginAssets/close.svg";
 import message from "../assets/bubbles/Vector (2).svg";
 import photo from "../assets/bubbles/SVG (3).svg";
@@ -14,7 +11,7 @@ import GIF from "../assets/bubbles/gif.svg";
 import text from "../assets/bubbles/text.svg";
 import phone from "../assets/bubbles/phone.svg";
 import number from "../assets/bubbles/number.svg";
-import email from "../assets/bubbles/email.svg";
+import emails from "../assets/bubbles/email.svg";
 import date from "../assets/bubbles/date.svg";
 import rating from "../assets/bubbles/rating.svg";
 import button from "../assets/bubbles/button.svg";
@@ -188,7 +185,7 @@ const workspace = () => {
     setAddedComponents((prev) => [
       ...prev,
       { name: componentName, id: Date.now(), value: "", error: false },
-    ]); // Add component with unique ID and validation state
+    ]);
   };
 
   const handleDeleteComponent = async (componentName) => {
@@ -252,62 +249,36 @@ const workspace = () => {
   const handleSave = async (e) => {
     e.preventDefault();
 
-    try {
-      // Simulate form save
-      setIsSaved(true); // Mark as saved
-      alert("Form saved successfully!");
-    } catch (error) {
-      console.error("Error saving form:", error);
-    }
-
-    if (!fileId) {
-      alert("File ID is missing.");
-      return;
-    }
-
-    const isValid = addedComponents.every((comp) => {
-      if (typeof comp.value !== "string") {
-        console.error(`Invalid value for component:`, comp);
-        return false;
+    const groupedData = addedComponents.reduce((acc, comp) => {
+      const key = comp.name.toLowerCase();
+      if (!acc[key]) {
+        acc[key] = [];
       }
-      return comp.value.trim() !== "";
-    });
+      acc[key].push(comp.value);
+      return acc;
+    }, {});
 
-    if (!isValid) {
-      alert("Please fill all required fields.");
-      return;
-    }
-
-    // Build the data object with the file ID
+    // Ensure `formname` is included
     const formattedData = {
-      file: fileId, // Include file ID
-      formname: data.formname, // Add formname explicitly
+      file: fileId,
+      formname: data.formname || "", // Include formname from state
+      ...groupedData,
     };
-
-    // Add dynamically generated fields
-    addedComponents.forEach((comp) => {
-      formattedData[comp.name.toLowerCase()] = comp.value;
-    });
-
-    // console.log("Data being sent to backend:", formattedData);
 
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/user/folder/${fileId}/form`,
         formattedData,
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
 
       if (response.status === 201) {
-        alert("Form created successfully!");
+        console.log("Form saved successfully:", response.data);
       }
     } catch (error) {
       console.error("Error creating form:", error);
-      alert("Failed to create the form.");
     }
   };
 
@@ -380,6 +351,30 @@ const workspace = () => {
     }
   };
 
+  const handlecontent = () => {
+    console.log("Handlecontent function triggered.");
+    if (!fileId) {
+      alert("File ID is missing. Cannot proceed.");
+      return;
+    }
+    console.log("Navigating to Workspace with File ID:", fileId);
+    navigate(`/Formbot/${fileId}`);
+  };
+  const handleFileUpload = (id, files) => {
+    const uploadedFile = files[0]; // Assuming single file upload
+    console.log("Uploaded file:", uploadedFile);
+
+    setAddedComponents((prev) =>
+      prev.map((comp) =>
+        comp.id === id
+          ? { ...comp, value: uploadedFile.name, error: !uploadedFile }
+          : comp
+      )
+    );
+
+    // You can also store the file object itself in state if needed for backend upload
+  };
+
   const handleSharePopupOpen = () => setIsSharePopupVisible(true);
   const handleSharePopupClose = () =>
     setIsSharePopupVisible(!isSharePopupVisible);
@@ -388,7 +383,9 @@ const workspace = () => {
     const fetchFileData = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/user/folders/${fileId}/form`,
+          `${
+            import.meta.env.VITE_BACKEND_URL
+          }/api/user/folders/${fileId}/forms`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -398,16 +395,16 @@ const workspace = () => {
 
         const formData = response.data.form;
 
-        if (formData && Object.keys(formData).length > 0) {
-          setIsDataAvailable(true); // Data is available
-        } else {
-          setIsDataAvailable(false);
-        }
-
         if (formData) {
-          // Filter out system keys and prepare the form data
-          const allowedKeys = Object.keys(formData).filter(
-            (key) =>
+          // Set formname directly in the state
+          setData((prevData) => ({
+            ...prevData,
+            formname: formData.formname || "",
+          }));
+
+          // Filter out unwanted keys and set added components
+          const filteredData = Object.entries(formData).filter(
+            ([key]) =>
               ![
                 "_id",
                 "__v",
@@ -418,38 +415,27 @@ const workspace = () => {
               ].includes(key)
           );
 
-          const filteredData = {};
-          allowedKeys.forEach((key) => {
-            filteredData[key] = formData[key] || "";
+          const structuredComponents = filteredData.flatMap(([key, values]) => {
+            if (Array.isArray(values)) {
+              return values.map((value) => ({
+                name: key.charAt(0).toUpperCase() + key.slice(1),
+                id: Date.now() + Math.random(),
+                value,
+              }));
+            }
+            return [
+              {
+                name: key.charAt(0).toUpperCase() + key.slice(1),
+                id: Date.now() + Math.random(),
+                value: values,
+              },
+            ];
           });
 
-          if (filteredData.date) {
-            filteredData.date = new Date(filteredData.date)
-              .toISOString()
-              .split("T")[0];
-          }
-
-          setData(filteredData);
-
-          // Map the form fields to `addedComponents`
-          const components = allowedKeys.map((key) => ({
-            name: key.charAt(0).toUpperCase() + key.slice(1),
-            id: Date.now() + Math.random(),
-            value: formData[key],
-            error: !formData[key],
-          }));
-
-          setAddedComponents(components);
-        } else {
-          console.error("No form data available.");
+          setAddedComponents(structuredComponents);
         }
       } catch (error) {
-        if (error.response?.status === 404) {
-          console.error("No form found for this file ID.");
-          alert("No form available for the provided file ID.");
-        } else {
-          console.error("Error fetching file data:", error);
-        }
+        console.error("Error fetching file data:", error);
       }
     };
 
@@ -638,7 +624,7 @@ const workspace = () => {
                   className="content"
                   onClick={() => handleComponentClick("Email")}
                 >
-                  <img src={email} alt="" />
+                  <img src={emails} alt="" />
                   Email
                 </div>
                 <div
@@ -669,10 +655,16 @@ const workspace = () => {
             </div>
           </div>
           <div className="allinputs">
-            <div className="contents">
+            <button
+              className="contents"
+              onClick={() => {
+                handlecontent();
+              }}
+            >
               <img src={flag} alt="" className="list" />
               Start
-            </div>
+            </button>
+
             <div className="allinputs1">
               <div
                 style={{
@@ -682,28 +674,44 @@ const workspace = () => {
                 }}
               >
                 {addedComponents.map((comp) => {
-                  const inputType = ["Image", "Button", "Bubble_text"].includes(
-                    comp.name
-                  )
+                  const inputType = [
+                    "Image",
+                    "Button",
+                    "Bubble_text",
+                    "Number",
+                  ].includes(comp.name)
                     ? "text"
                     : comp.name.toLowerCase();
 
                   return (
                     <div className="contents1" key={comp.id}>
                       <span>{comp.name}</span>
-                      <input
-                        className="inputs11"
-                        type={inputType}
-                        value={comp.value || ""}
-                        placeholder={`Enter details for ${comp.name}`}
-                        onChange={(e) =>
-                          handleInputChange(comp.id, e.target.value)
-                        }
-                        onBlur={(e) => handleBlur(comp.id, e.target.value)}
-                        style={{
-                          borderColor: comp.error ? "red" : "#282c34",
-                        }}
-                      />
+                      {inputType === "file" ? (
+                        <input
+                          className="inputs11"
+                          type="file"
+                          onChange={(e) =>
+                            handleFileUpload(comp.id, e.target.files)
+                          }
+                          style={{
+                            borderColor: comp.error ? "red" : "#282c34",
+                          }}
+                        />
+                      ) : (
+                        <input
+                          className="inputs11"
+                          type={inputType?.toLowerCase() || "text"}
+                          value={comp.value || ""}
+                          placeholder={`Enter details for ${comp.name}`}
+                          onChange={(e) =>
+                            handleInputChange(comp.id, e.target.value)
+                          }
+                          onBlur={(e) => handleBlur(comp.id, e.target.value)}
+                          style={{
+                            borderColor: comp.error ? "red" : "#282c34",
+                          }}
+                        />
+                      )}
                       {comp.error && (
                         <p className="error-text">Required Field</p>
                       )}
@@ -713,7 +721,7 @@ const workspace = () => {
                         alt="Delete"
                         onClick={() =>
                           handleDeleteComponent(comp.name.toLowerCase())
-                        } // Use name instead of id
+                        }
                       />
                     </div>
                   );
