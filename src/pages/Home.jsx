@@ -52,6 +52,12 @@ const Home = () => {
       homeElement.style.backgroundColor = "white"; // Set background color
       homeElement.style.color = "black";
     }
+    const containerElement = document.querySelector(".container");
+    if (isDarkMode) {
+      containerElement.style.backgroundColor = "black"; // Set background color
+    } else {
+      containerElement.style.backgroundColor = "white"; // Set background color
+    }
   };
 
   // Handlers for showing and hiding the popup
