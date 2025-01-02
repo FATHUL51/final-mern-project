@@ -573,7 +573,7 @@ const workspace = () => {
           </div>
         </div>
       </div>
-      <hr />
+      <span />
       <div className="cona">
         <div>
           <div className="hrcontainer">

@@ -402,7 +402,6 @@ const Home = () => {
           </div>
         )}
       </div>
-      <hr />
       <div className="folder">
         <div className="foldersname">
           <p className="foldercreate" onClick={() => handlecreateclick()}>

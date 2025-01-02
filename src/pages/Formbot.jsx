@@ -1,20 +1,63 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import send from "../assets/bubbles/send.svg";
+import "./Formbot.modular.css";
 
 const Formbot = () => {
   const { fileId } = useParams();
-  const [formbot, setFormbot] = useState([]); // Entire form data
-  const [messages, setMessages] = useState([]); // Chat messages
-  const [input, setInput] = useState(""); // User input
-  const [isBotTyping, setIsBotTyping] = useState(false); // Bot typing status
-  const [bubbleQueue, setBubbleQueue] = useState([]); // Queue for bubble_text and images
-  const [placeholderQueue, setPlaceholderQueue] = useState([]); // Queue for placeholders
-  const [responses, setResponses] = useState({}); // Store user responses
-  const [isChatComplete, setIsChatComplete] = useState(false); // Disable chat on completion
+  const [formbot, setFormbot] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [isBotTyping, setIsBotTyping] = useState(false);
+  const [bubbleQueue, setBubbleQueue] = useState([]);
+  const [placeholderQueue, setPlaceholderQueue] = useState([]);
+  const [responses, setResponses] = useState({});
+  const [isChatComplete, setIsChatComplete] = useState(false);
   const [currentPlaceholder, setCurrentPlaceholder] = useState(
     "Type your answer..."
-  ); // Dynamic placeholder
+  );
+
+  useEffect(() => {
+    // Track page visits and send "1 view" to backend
+    const visitTimestamp = new Date().toISOString();
+    axios
+      .post(`${import.meta.env.VITE_BACKEND_URL}/api/user/page-visit`, {
+        fileId,
+        status: "1view",
+        timestamp: visitTimestamp,
+      })
+      .catch((error) => console.error("Error logging page visit:", error));
+
+    // Handle incomplete form submission when the user leaves
+    const handlePageLeave = () => {
+      if (!isChatComplete) {
+        const leaveTimestamp = new Date().toISOString();
+        axios
+          .post(`${import.meta.env.VITE_BACKEND_URL}/api/user/form-status`, {
+            fileId,
+            status: "incomplete",
+            timestamp: leaveTimestamp,
+          })
+          .catch((error) =>
+            console.error("Error logging incomplete status:", error)
+          );
+      }
+    };
+
+    window.addEventListener("beforeunload", handlePageLeave);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") {
+        handlePageLeave();
+      }
+    });
+
+    // Cleanup event listeners on component unmount
+    return () => {
+      window.removeEventListener("beforeunload", handlePageLeave);
+      document.removeEventListener("visibilitychange", handlePageLeave);
+    };
+  }, [fileId, isChatComplete]);
 
   useEffect(() => {
     axios
@@ -23,12 +66,8 @@ const Formbot = () => {
       )
       .then((response) => {
         const form = response.data.form;
-
-        // Extract bubble_text and images for the bot to show
         const bubbleTexts = form?.bubble_text || [];
         const images = form?.image || [];
-
-        // Other data fields (email, number, etc.)
         const otherData = [
           { key: "text", value: form?.text?.[0] || "" },
           { key: "number", value: form?.number?.[0] || "" },
@@ -37,9 +76,8 @@ const Formbot = () => {
           { key: "date", value: form?.date?.[0] || "" },
           { key: "rating", value: form?.rating?.[0] || "" },
           { key: "button", value: form?.button?.[0] || "" },
-        ].filter(({ value }) => value); // Filter out empty values
+        ].filter(({ value }) => value);
 
-        // Combine bubble_text and images for the bubble queue
         const bubbles = [
           ...bubbleTexts.map((text) => ({
             type: "bubble_text",
@@ -48,33 +86,27 @@ const Formbot = () => {
           ...images.map((image) => ({ type: "image", content: image })),
         ];
 
-        setFormbot(form); // Store raw form data for reference
-        setBubbleQueue(bubbles); // Initialize bubble queue
-        setPlaceholderQueue(otherData); // Initialize placeholder queue
+        setFormbot(form);
+        setBubbleQueue(bubbles);
+        setPlaceholderQueue(otherData);
 
-        // Start chat with a welcome message and the first bubble
         if (bubbles.length > 0) {
           setMessages([
             { sender: "bot", text: "Welcome! Let's get started." },
             { sender: "bot", text: bubbles[0]?.content },
           ]);
         }
-
-        // console.log("Bubble Queue:", bubbles);
-        // console.log("Placeholder Queue:", otherData);
       })
       .catch((error) => {
-        console.error(error);
+        console.error("Error fetching form data:", error);
       });
   }, [fileId]);
 
   const sendMessage = () => {
     if (input.trim() === "" || isChatComplete) return;
 
-    // Add user's message to the chat
     setMessages((prev) => [...prev, { sender: "user", text: input }]);
 
-    // Store the response with a specific key
     if (bubbleQueue.length > 0) {
       const currentBubble = bubbleQueue[0];
       setResponses((prev) => ({
@@ -97,7 +129,6 @@ const Formbot = () => {
 
     setTimeout(() => {
       if (bubbleQueue.length > 1) {
-        // Show the next bubble (text or image)
         const nextBubble = bubbleQueue[1];
         setBubbleQueue((prev) => prev.slice(1));
 
@@ -117,7 +148,6 @@ const Formbot = () => {
           ]);
         }
       } else if (bubbleQueue.length === 1) {
-        // If bubble queue is empty, switch to placeholders
         setBubbleQueue([]);
         if (placeholderQueue.length > 0) {
           const nextPlaceholder = placeholderQueue[0];
@@ -131,20 +161,16 @@ const Formbot = () => {
           setCurrentPlaceholder(nextPlaceholder.value);
         }
       } else if (placeholderQueue.length > 1) {
-        // Move to the next placeholder
         setPlaceholderQueue((prev) => prev.slice(1));
         const nextPlaceholder = placeholderQueue[1];
         setCurrentPlaceholder(nextPlaceholder.value);
       } else {
-        // End the chat
         const finalResponses = {
           ...responses,
           fileId,
           timestamp: new Date().toISOString(),
           status: "completed",
         };
-
-        // console.log("Final Responses:", finalResponses);
 
         saveResponsesToFile(finalResponses);
         sendResponsesToBackend(finalResponses);
@@ -153,7 +179,7 @@ const Formbot = () => {
           ...prev,
           { sender: "bot", text: "Thank you for completing the form!" },
         ]);
-        setIsChatComplete(true); // Disable input and button
+        setIsChatComplete(true);
       }
       setIsBotTyping(false);
     }, 1500);
@@ -170,185 +196,148 @@ const Formbot = () => {
     link.click();
   };
 
-  const handleFormCompletion = () => {
-    console.log("Raw responses object:", responses);
-
-    // Transform `responses` into the required array format
-    const responsesArray = Object.entries(responses).flatMap(
-      ([title, values]) => {
-        if (Array.isArray(values)) {
-          // For arrays like bubble_text or image
-          return values.map((item, index) => ({
-            title, // Key name (e.g., bubble_text, image)
-            question: item.content || title, // Question text
-            message: item.answer, // User's response
-            index, // Array index
-          }));
-        }
-
-        // For single-value responses (e.g., email, number)
-        return [
-          {
-            title,
-            question: title, // Key name as question
-            message: values, // User's response
-            index: 0,
-          },
-        ];
-      }
-    );
-
-    console.log("Transformed responses array:", responsesArray);
-
-    // Send the transformed data to the backend
-    sendResponsesToBackend(responsesArray);
-  };
-
-  const finalizeChat = () => {
-    const finalResponses = {
-      ...responses,
-      fileId,
-      timestamp: new Date().toISOString(),
-      status: "completed",
-    };
-
-    const responsesArray = transformResponsesToArray(finalResponses);
-
-    sendResponsesToBackend(responsesArray);
-  };
-
-  const transformResponsesToArray = (responses) => {
-    return Object.entries(responses).flatMap(([key, value]) => {
-      if (Array.isArray(value)) {
-        return value.map((item) => ({
-          title: key,
-          content: item.content || key,
-          answer: item.answer,
-        }));
-      } else {
-        return {
-          title: key,
-          content: key,
-          answer: value,
-        };
-      }
-    });
-  };
-
   const sendResponsesToBackend = async (data) => {
     try {
-      console.log("Payload being sent to backend:", { replies: data });
+      // Filter out empty responses
+      const filteredResponses = Object.fromEntries(
+        Object.entries(data).filter(([, value]) => value && value.length > 0)
+      );
+
+      console.log("Sending filtered responses to backend:", filteredResponses);
 
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/user/Formbot/${fileId}`,
-        { replies: data }
+        { replies: filteredResponses }
       );
 
-      console.log("Data successfully sent to backend:", response.data);
+      if (response.status === 200 || response.status === 201) {
+        console.log("Responses successfully sent to backend.", response.data);
+      } else {
+        console.error(
+          "Failed to send responses to backend. Status:",
+          response.status
+        );
+      }
     } catch (error) {
       console.error(
-        "Error sending data to backend:",
+        "Error sending responses to backend:",
         error.response?.data || error.message
       );
     }
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.chatWindow}>
+    <div className="contain">
+      <div className="chatWindow">
         {messages.map((msg, index) => (
           <div
             key={index}
+            className="message"
             style={{
-              ...styles.message,
               alignSelf: msg.sender === "user" ? "flex-end" : "flex-start",
-              backgroundColor: msg.sender === "user" ? "#daf8e3" : "#000",
+              backgroundColor:
+                msg.sender === "user" ? "#ff8e21" : "rgb(237, 237, 237)",
+              color: msg.sender === "user" ? "white" : "black",
+              margin: msg.sender === "user" ? "0 2rem 0 0" : "0 0 0 2rem",
+              ...(window.innerWidth <= 768 && {
+                margin: msg.sender === "user" ? "0 5px 0 0" : "0 0 0 5px",
+                padding: msg.sender === "user" ? "10px 15px" : "10px 15px",
+              }),
             }}
           >
             {msg.text}
             {msg.image && (
-              <img src={msg.image} alt="Form Image" style={styles.image} />
+              <img src={msg.image} alt="Form Image" className="image" />
             )}
           </div>
         ))}
         {isBotTyping && (
-          <div style={{ ...styles.message, alignSelf: "flex-start" }}>
+          <div
+            className="message"
+            style={{
+              alignSelf: "flex-start",
+              margin: "0 0 0 2rem",
+              ...(window.innerWidth <= 768 && { margin: "0 0 0 5px" }),
+            }}
+          >
             Bot is typing...
           </div>
         )}
       </div>
-      <div style={styles.inputContainer}>
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={currentPlaceholder}
-          style={styles.input}
-          disabled={isChatComplete}
-        />
-        <button
-          onClick={sendMessage}
-          style={styles.button}
-          disabled={isChatComplete}
-        >
-          Send
+      <div className="inputContainer">
+        {(() => {
+          let inputType =
+            placeholderQueue.length > 0 ? placeholderQueue[0].key : "text";
+
+          switch (inputType) {
+            case "text":
+            case "bubble_text":
+            case "image":
+            case "button":
+            case "email":
+              return (
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={currentPlaceholder || "Enter your text"}
+                  className="input"
+                />
+              );
+            case "phone":
+            case "number":
+              return (
+                <input
+                  type="number"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={currentPlaceholder || "Enter a number"}
+                  className="input"
+                />
+              );
+            case "date":
+              return (
+                <input
+                  type="date"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  className="input"
+                />
+              );
+            case "rating":
+              return (
+                <div className="inputs1">
+                  {[1, 2, 3, 4, 5].map((rating) => (
+                    <button
+                      key={rating}
+                      className="ratingButton"
+                      onClick={() => setInput(String(rating))}
+                      style={{
+                        padding: "0.5rem 1rem",
+                        margin: "0.2rem",
+                        height: "40px",
+                        border: "1px solid #ccc",
+                        borderRadius: "100%",
+                        backgroundColor:
+                          rating === Number(input) ? "#ff8e21" : "#007bff",
+                        color: rating === Number(input) ? "white" : "white",
+                      }}
+                    >
+                      {rating}
+                    </button>
+                  ))}
+                </div>
+              );
+            default:
+              return null;
+          }
+        })()}
+        <button className="button" onClick={sendMessage}>
+          <img src={send} alt="" />
         </button>
       </div>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100vh",
-    backgroundColor: "#f9f9f9",
-  },
-  chatWindow: {
-    width: "50%",
-    height: "70%",
-    overflowY: "scroll",
-    border: "1px solid #ccc",
-    borderRadius: "10px",
-    padding: "10px",
-    backgroundColor: "#fff",
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
-  },
-  message: {
-    maxWidth: "70%",
-    padding: "10px",
-    borderRadius: "10px",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-  },
-  image: {
-    maxWidth: "100%",
-    borderRadius: "10px",
-    marginTop: "10px",
-  },
-  inputContainer: {
-    display: "flex",
-    gap: "10px",
-    marginTop: "10px",
-  },
-  input: {
-    width: "70%",
-    padding: "10px",
-    borderRadius: "5px",
-    border: "1px solid #ccc",
-  },
-  button: {
-    padding: "10px 20px",
-    borderRadius: "5px",
-    border: "none",
-    backgroundColor: "#007bff",
-    color: "#fff",
-    cursor: "pointer",
-  },
 };
 
 export default Formbot;
