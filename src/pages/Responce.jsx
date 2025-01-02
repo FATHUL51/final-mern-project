@@ -14,16 +14,16 @@ const Response = () => {
   const { formId } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState([]);
-  const [views, setViews] = useState(0);
+  const [save, setSave] = useState([]);
+  const [incomplete, setIncomplete] = useState([]); // Incomplete data
+  const [viewscount, setViewscount] = useState([]); // Views data
   const [starts, setStarts] = useState(0);
   const [completion, setCompletion] = useState(0);
-  const [isShareEnabled, setIsShareEnabled] = useState(false);
   const [isSharePopupVisible, setIsSharePopupVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("edit");
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [close, setClose] = useState(false);
-  const [selected, setSelected] = useState("res");
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return localStorage.getItem("theme") === "dark";
   });
@@ -87,8 +87,8 @@ const Response = () => {
         `${import.meta.env.VITE_BACKEND_URL}/api/user/${formId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      console.log("Fetched data:", response.data); // Debug the fetched data
+      setSave(response.data);
+      // console.log("Fetched data:", response.data); // Debug the fetched data
 
       if (Array.isArray(response.data) && response.data.length > 0) {
         // Process the backend data
@@ -107,17 +107,59 @@ const Response = () => {
           status: item.status || "N/A",
         }));
 
-        console.log("Processed replies for state:", replies); // Debug processed replies
+        // console.log("Processed replies for state:", replies); // Debug processed replies
         setData(replies); // Update the state with the processed data
       } else {
-        console.warn("No valid data received from backend.");
+        // console.warn("No valid data received from backend.");
         setData([]); // Reset state if no data
       }
     } catch (error) {
-      console.error("Error fetching response data:", error);
+      // console.error("Error fetching response data:", error);
       setData([]); // Reset state on error
     }
   };
+
+  const fetchviews = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/user/page-visit/${formId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (response.status === 200) {
+        // Assuming the response contains the array of visits directly
+        setViewscount(response.data); // Set the full array to state
+        // console.log("Views data:", response.data);
+      } else {
+        console.warn("Unexpected response status:", response.status);
+        setViewscount([]); // Reset the state if no valid data is received
+      }
+    } catch (error) {
+      console.error("Error fetching views data:", error);
+      setViewscount([]); // Reset state on error
+    }
+  };
+
+  const fetchincomplete = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/user/form-status/${formId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // console.log("Incomplete response:", response.data); // Debug
+      setIncomplete(response.data); // Set the incomplete data to state
+    } catch (error) {
+      // console.error("Error fetching incomplete data:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (formId) {
+      fetchviews();
+      fetchincomplete();
+    }
+  }, [formId]);
 
   const handleclose = () => {
     setClose(true);
@@ -189,14 +231,23 @@ const Response = () => {
     }
   };
 
-  const completionRate = starts ? Math.round((completion / starts) * 100) : 0;
+  const validSave = Array.isArray(save) ? save : [];
+  const validSaveLength = validSave.length;
+
+  const validIncomplete = Array.isArray(incomplete) ? incomplete : [];
+  const validIncompleteLength = validIncomplete.length;
+
+  const starts1 = validSaveLength + validIncompleteLength;
+  const completionRate =
+    starts1 > 0 ? Math.round((validSaveLength / starts1) * 100) : 0;
 
   const chartData = {
-    labels: ["Completed", "Remaining"],
+    labels: ["Completed", "Incomplete"],
     datasets: [
       {
-        data: [completion, starts - completion],
-        backgroundColor: ["#007BFF", "#D3D3D3"],
+        data: [validSaveLength, starts1 - validSaveLength],
+        backgroundColor: ["#007BFF", "#D3D3D3"], // Blue for completed, grey for incomplete
+        hoverBackgroundColor: ["#0056b3", "#A9A9A9"],
         borderWidth: 1,
       },
     ],
@@ -300,33 +351,102 @@ const Response = () => {
         </div>
       </div>
       <span />
-      {console.log("Data in state:", data, "Data length:", data.length)}
-      {data.length > 0 ? (
-        <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                {/* Dynamically generate table headers */}
-                {data.length > 0 &&
-                  Object.keys(data[0]).map((key) => (
-                    <th key={key}>
-                      {key.charAt(0).toUpperCase() + key.slice(1)}
-                    </th>
-                  ))}
-              </tr>
-            </thead>
-            <tbody>
-              {/* Dynamically generate table rows */}
-              {data.map((row, rowIndex) => (
-                <tr key={rowIndex}>
-                  {Object.values(row).map((value, colIndex) => (
-                    <td key={colIndex}>{value}</td>
-                  ))}
+      {validSave || validIncompleteLength || starts1 > 0 ? (
+        <>
+          <div className="body1">
+            <div className="views">
+              Views
+              <div className="viewscount">{viewscount?.length || 0}</div>
+            </div>
+            <div className="starts">
+              Starts
+              <div className="startscount">
+                {save?.length && incomplete?.length
+                  ? incomplete.length + save.length
+                  : 0}
+              </div>
+            </div>
+          </div>
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  {/* Dynamically generate table headers */}
+                  {data.length > 0 &&
+                    Object.keys(data[0]).map((key) => (
+                      <th key={key}>
+                        {key.charAt(0).toUpperCase() + key.slice(1)}
+                      </th>
+                    ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {/* Dynamically generate table rows */}
+                {data.map((row, rowIndex) => (
+                  <tr key={rowIndex}>
+                    {Object.values(row).map((value, colIndex) => (
+                      <td key={colIndex}>{value}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Doughnut Chart */}
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                width: "30%",
+                position: "relative",
+                left: "25%",
+                bottom: "3rem",
+                rotate: "50deg",
+              }}
+            >
+              <Doughnut data={chartData} />
+            </div>
+            <div style={{ marginLeft: "20px", textAlign: "center" }}>
+              <div
+                style={{
+                  fontSize: "1.5em",
+                  fontWeight: "bold",
+                  padding: "10px",
+                  borderRadius: "0.5rem",
+                  width: "15rem",
+                  position: "relative",
+                  bottom: "6.5rem",
+                  left: "95%",
+                }}
+              >
+                completed <br /> <span>{validSaveLength}</span>
+              </div>
+              <div
+                style={{
+                  fontSize: "1.5em",
+                  fontWeight: "bold",
+                  backgroundColor: "#333",
+                  color: "#fff",
+                  padding: "10px",
+                  borderRadius: "0.5rem",
+                  width: "15rem",
+                  position: "relative",
+                  bottom: "4rem",
+                  right: "-172%",
+                }}
+              >
+                Completion rate
+                <br />
+                {completionRate}%
+              </div>
+            </div>
+          </div>
+          <span className="textofscroll">
+            scroll ⬆️ ⬇️ and ➡ ⬅ for viewing all details of table.
+          </span>
+        </>
       ) : (
         <div className="body">
           <p className="letssee" style={{ color: "#696969" }}>
