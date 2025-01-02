@@ -76,13 +76,13 @@ const Setting = () => {
   };
 
   return (
-    <div className="div">
+    <div className="div1">
       <h2 className="h2">Settings</h2>
-      <form className="form" onSubmit={handlesubmit}>
+      <form className="forms" onSubmit={handlesubmit}>
         <span className="span">
-          <img className="image" src={profile} alt="" />
+          <img className="imagesw" src={profile} alt="" />
           <input
-            className="input"
+            className="input2"
             name="username"
             value={data.username}
             onChange={handleChange}
@@ -92,9 +92,9 @@ const Setting = () => {
         </span>
 
         <span className="span">
-          <img className="image" src={lock} alt="" />
+          <img className="imagesw" src={lock} alt="" />
           <input
-            className="input"
+            className="input2"
             name="email"
             value={data.email}
             onChange={handleChange}
@@ -103,9 +103,9 @@ const Setting = () => {
           />
         </span>
         <span className="span">
-          <img className="image" src={lock} alt="" />
+          <img className="imagesw" src={lock} alt="" />
           <input
-            className="input"
+            className="input2"
             name="oldpassword"
             value={data.oldpassword}
             onChange={handleChange}
@@ -114,9 +114,9 @@ const Setting = () => {
           />
         </span>
         <span className="span">
-          <img className="image" src={lock} alt="" />
+          <img className="imagesw" src={lock} alt="" />
           <input
-            className="input"
+            className="input2"
             name="password"
             value={data.password}
             onChange={handleChange}
@@ -125,7 +125,7 @@ const Setting = () => {
           />
         </span>
 
-        <button className="button" type="submit">
+        <button className="button11" type="submit">
           Update
         </button>
       </form>

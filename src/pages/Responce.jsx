@@ -305,7 +305,7 @@ const Response = () => {
                 </div>
                 <input
                   type="email"
-                  className="inputs1"
+                  className="inputs12"
                   value={email}
                   placeholder="Enter email Id"
                   onChange={(e) => setEmail(e.target.value)}
@@ -349,7 +349,7 @@ const Response = () => {
         </div>
       </div>
       <span />
-      {validSave || validIncompleteLength || starts1 > 0 ? (
+      {validSave || validIncompleteLength || starts1 > 1 ? (
         <>
           <div className="body1">
             <div className="views">
