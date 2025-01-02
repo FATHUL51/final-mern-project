@@ -17,8 +17,6 @@ const Response = () => {
   const [save, setSave] = useState([]);
   const [incomplete, setIncomplete] = useState([]); // Incomplete data
   const [viewscount, setViewscount] = useState([]); // Views data
-  const [starts, setStarts] = useState(0);
-  const [completion, setCompletion] = useState(0);
   const [isSharePopupVisible, setIsSharePopupVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("edit");
@@ -394,53 +392,18 @@ const Response = () => {
           </div>
 
           {/* Doughnut Chart */}
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                width: "30%",
-                position: "relative",
-                left: "25%",
-                bottom: "3rem",
-                rotate: "50deg",
-              }}
-            >
+          <div className="containers">
+            <div className="chart">
               <Doughnut data={chartData} />
             </div>
-            <div style={{ marginLeft: "20px", textAlign: "center" }}>
-              <div
-                style={{
-                  fontSize: "1.5em",
-                  fontWeight: "bold",
-                  padding: "10px",
-                  borderRadius: "0.5rem",
-                  width: "15rem",
-                  position: "relative",
-                  bottom: "6.5rem",
-                  left: "95%",
-                }}
-              >
-                completed <br /> <span>{validSaveLength}</span>
-              </div>
-              <div
-                style={{
-                  fontSize: "1.5em",
-                  fontWeight: "bold",
-                  backgroundColor: "#333",
-                  color: "#fff",
-                  padding: "10px",
-                  borderRadius: "0.5rem",
-                  width: "15rem",
-                  position: "relative",
-                  bottom: "4rem",
-                  right: "-172%",
-                }}
-              >
-                Completion rate
-                <br />
-                {completionRate}%
-              </div>
+
+            <div className="completed">
+              completed <br /> <span>{validSaveLength}</span>
+            </div>
+            <div className="completerate">
+              Completion rate
+              <br />
+              {completionRate}%
             </div>
           </div>
           <span className="textofscroll">

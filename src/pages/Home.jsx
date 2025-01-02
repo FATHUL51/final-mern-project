@@ -379,7 +379,7 @@ const Home = () => {
             </div>
             <input
               type="email"
-              className="inputs1"
+              className="inputs12"
               value={email}
               placeholder="Enter email Id"
               onChange={(e) => setEmail(e.target.value)}
