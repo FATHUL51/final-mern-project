@@ -51,7 +51,7 @@ const Response = () => {
     }
     if (homeElement1) {
       if (isDarkMode) {
-        homeElement1.style.backgroundColor = "#18181b";
+        homeElement1.style.backgroundColor = "#000";
         homeElement1.style.color = "white";
       } else {
         homeElement1.style.backgroundColor = "white";
@@ -62,7 +62,7 @@ const Response = () => {
     }
     if (homeElement2) {
       if (isDarkMode) {
-        homeElement2.style.backgroundColor = "#18181b";
+        homeElement2.style.backgroundColor = "#000";
         homeElement2.style.color = "white";
       } else {
         homeElement2.style.backgroundColor = "white";
