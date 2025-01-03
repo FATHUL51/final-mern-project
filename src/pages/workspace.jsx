@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import "./Workspace.css";
+import Toastify from "toastify-js";
+import "toastify-js/src/toastify.css";
 import ThemeToggle from "./themeChanger";
 import closed from "../assets/loginAssets/close.svg";
 import message from "../assets/bubbles/Vector (2).svg";
@@ -193,7 +195,7 @@ const workspace = () => {
       // console.log("Deleting component:", componentName);
 
       if (!fileId) {
-        alert("File ID is missing.");
+        Toastify({ text: "File ID is missing." }).showToast();
         return;
       }
 
@@ -218,10 +220,12 @@ const workspace = () => {
         );
         // alert("Component deleted successfully.");
       } else {
-        alert(response.data.message || "Failed to delete the component.");
+        Toastify({
+          text: response.data.message || "Failed to delete the component.",
+        }).showToast();
       }
     } catch (error) {
-      alert("Failed to delete the component.", error);
+      Toastify({ text: "Failed to delete the component.", error }).showToast();
     }
   };
 
@@ -293,7 +297,7 @@ const workspace = () => {
   const handleClick = (type) => {
     if (type === "res") {
       if (!fileId) {
-        alert("Form ID is missing.");
+        Toastify({ text: "Form ID is missing." }).showToast();
         return;
       }
 
@@ -316,11 +320,13 @@ const workspace = () => {
 
       if (response.status === 201) {
         navigator.clipboard.writeText(response.data.sharingLink); // Copy link to clipboard
-        alert("Share Link copied to clipboard!");
+        Toastify({ text: "Share Link copied to clipboard!" }).showToast();
       }
     } catch (error) {
       console.error("Error creating share link:", error);
-      alert(error.response?.data?.message || "Failed to create share link.");
+      Toastify({
+        text: error.response?.data?.message || "Failed to create share link.",
+      }).showToast();
     }
   };
 

@@ -10,6 +10,8 @@ import delete1 from "../assets/delete.svg";
 import plusicon from "../assets/SVG (2).svg";
 import close from "../assets/loginAssets/close.svg";
 import ThemeToggle from "./themeChanger";
+import Toastify from "toastify-js";
+import "toastify-js/src/toastify.css";
 
 const Home = () => {
   const [data, setData] = useState(null);
@@ -93,22 +95,26 @@ const Home = () => {
 
       if (response.status === 201) {
         // Check for success status code
-        console.log("Folder created successfully:", response.data.folder);
+        // console.log("Folder created successfully:", response.data.folder);
         fetchform(); // Refresh the folder list after creation
-        // alert("Folder created successfully");
+        Toastify({ text: "Folder created successfully" }).showToast();
         setIsFolder(false); // Close popup
         setFoldername(""); // Reset input field
       }
     } catch (error) {
       if (error.response) {
         // Handle server-side error responses
-        alert(error.response.data.message || "Something went wrong!");
+        Toastify({
+          text: error.response.data.message || "Something went wrong!",
+        }).showToast();
       } else if (error.request) {
         // Handle client-side or network errors
-        alert("No response from the server. Please try again later.");
+        Toastify({
+          text: "No response from the server. Please try again later.",
+        }).showToast();
       } else {
         // Handle unexpected errors
-        alert("An error occurred: " + error.message);
+        Toastify({ text: "An error occurred: " + error.message }).showToast();
       }
     }
   };
@@ -131,16 +137,16 @@ const Home = () => {
       if (response.status === 201) {
         const newFileId = response.data.file._id; // Assuming the backend returns the file ID
         setCreatedFileId(newFileId); // Save the file ID
-        console.log("File created successfully. File ID:", newFileId);
+        // console.log("File created successfully. File ID:", newFileId);
 
         fetchfile(); // Refresh file list
-        // alert("File created successfully");
+        Toastify({ text: "File created successfully" }).showToast();
         setIsFolder1(false); // Close popup
         setFilename(""); // Reset input field
       }
     } catch (error) {
       console.error("Error creating file:", error);
-      alert("Failed to create the file.");
+      Toastify({ text: "Failed to create the file." }).showToast();
     }
   };
 
@@ -197,11 +203,13 @@ const Home = () => {
         }
       );
 
-      // alert(response.data.message); // Notify the user
+      Toastify({ text: response.data.message }).showToast(); // Notify the user
       fetchform(); // Refresh the folder list
     } catch (error) {
       console.error("Error deleting folder:", error);
-      alert(error.response?.data?.message || "Failed to delete the folder.");
+      Toastify({
+        text: error.response?.data?.message || "Failed to delete the folder.",
+      }).showToast();
     }
   };
   const deleteFile = async (fileId) => {
@@ -216,12 +224,14 @@ const Home = () => {
         }
       );
 
-      console.log("Delete response:", response.data); // Debug log
-      // alert(response.data.message);
+      // console.log("Delete response:", response.data); // Debug log
+      Toastify({ text: response.data.message }).showToast(); // Notify the user
       fetchfile(); // Refresh file list
     } catch (error) {
       console.error("Error deleting file:", error);
-      alert(error.response?.data?.message || "Failed to delete the file.");
+      Toastify({
+        text: error.response?.data?.message || "Failed to delete the file.",
+      }).showToast();
     }
   };
 
@@ -244,7 +254,7 @@ const Home = () => {
   };
   const handleLogout = async () => {
     localStorage.removeItem("token");
-    // alert("logout sucessful");
+    Toastify({ text: "logout sucessful" }).showToast();
     navigate("/Login");
     window.location.reload;
   };
@@ -269,11 +279,13 @@ const Home = () => {
 
       if (response.status === 201) {
         navigator.clipboard.writeText(response.data.sharingLink); // Copy link to clipboard
-        alert("Share Link copied to clipboard!");
+        Toastify({ text: "Share Link copied to clipboard!" }).showToast();
       }
     } catch (error) {
       console.error("Error creating share link:", error);
-      alert(error.response?.data?.message || "Failed to create share link.");
+      Toastify({
+        text: error.response?.data?.message || "Failed to create share link.",
+      }).showToast();
     }
   };
 
@@ -513,7 +525,7 @@ const Home = () => {
                   className="done"
                   onClick={(e) => {
                     submitform1(e);
-                    console.log("Done clicked");
+                    // console.log("Done clicked");
                   }}
                 >
                   Done
@@ -521,7 +533,7 @@ const Home = () => {
                 <button
                   onClick={() => {
                     setIsFolder1(false);
-                    console.log("cancel clicked");
+                    // console.log("cancel clicked");
                   }}
                   className="cancel"
                 >

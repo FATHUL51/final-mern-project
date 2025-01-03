@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import logout from "../assets/loginAssets/Logout.svg";
 import { useNavigate } from "react-router-dom";
 import "./Setting.css";
+import Toastify from "toastify-js";
+import "toastify-js/src/toastify.css";
 import lock from "../assets/lock.svg";
 import profile from "../assets/Frame 1036.svg";
 
@@ -43,7 +45,7 @@ const Setting = () => {
           }
         );
         if (response.status === 200) {
-          alert("Settings updated successfully!");
+          Toastify({ text: "Settings updated successfully!" }).showToast();
           // Optionally reset data or handle after-submit actions
           setData({
             username: "",
@@ -54,10 +56,12 @@ const Setting = () => {
         }
       } catch (error) {
         console.error("Error updating settings:", error);
-        alert("An error occurred while updating settings.");
+        Toastify({
+          text: "An error occurred while updating settings.",
+        }).showToast();
       }
     } else {
-      alert("Please fill in all fields.");
+      Toastify({ text: "Please fill in all fields." }).showToast();
     }
   };
 
@@ -71,7 +75,7 @@ const Setting = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    alert("Logged out successfully");
+    Toastify({ text: "Logged out successfully" }).showToast();
     navigate("/Login");
   };
 

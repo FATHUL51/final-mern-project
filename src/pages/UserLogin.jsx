@@ -35,7 +35,7 @@ const UserLogin = () => {
         const data = responce.data;
         setUser(data.user);
         localStorage.setItem("token", data.token);
-        alert("Login successful");
+        Toastify({ text: "Login successful" }).showToast();
         navigate("/home");
         //to hide credentials from frontend
         window.location.reload();
@@ -52,7 +52,7 @@ const UserLogin = () => {
         }).showToast();
       } else {
         // Other errors
-        alert(`An error occurred: ${error.message}`);
+        Toastify({ text: `An error occurred: ${error.message}` }).showToast();
       }
     }
 

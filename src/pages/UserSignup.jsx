@@ -54,7 +54,9 @@ const UserSignup = () => {
         const data = response.data;
         setUser(data.user);
         localStorage.setItem("token", data.token);
-        alert("User created successfully");
+        Toastify({
+          text: "User created successfully",
+        }).showToast();
         navigate("/Login");
       }
     } catch (error) {
@@ -63,9 +65,11 @@ const UserSignup = () => {
           text: error.response.data.message || "Something went wrong!",
         }).showToast();
       } else if (error.request) {
-        alert("No response from the server. Please try again later.");
+        Toastify({
+          text: "No response from the server. Please try again later.",
+        }).showToast();
       } else {
-        alert("An error occurred: " + error.message);
+        Toastify({ text: "An error occurred: " + error.message }).showToast();
       }
     }
 
