@@ -42,9 +42,11 @@ const Response = () => {
       if (isDarkMode) {
         homeElement.style.backgroundColor = "#18181b";
         homeElement.style.color = "white";
+        homeElement.style.borderBottom="solid 1px white";
       } else {
         homeElement.style.backgroundColor = "white";
         homeElement.style.color = "black";
+        homeElement.style.borderBottom="solid 1px black";
       }
     } else {
       console.warn("Element with class 'home' not found.");
