@@ -7,6 +7,8 @@ import ellipse from "../assets/loginAssets/Ellipse 1.svg";
 import sllipse1 from "../assets/loginAssets/Ellipse 2.svg";
 import google from "../assets/loginAssets/Vector.svg";
 import aster from "../assets/loginAssets/Polygon 2.svg";
+import Toastify from "toastify-js";
+import "toastify-js/src/toastify.css";
 import "./UserLogin.css";
 
 const UserLogin = () => {
@@ -33,18 +35,21 @@ const UserLogin = () => {
         const data = responce.data;
         setUser(data.user);
         localStorage.setItem("token", data.token);
-        // alert("Login successful");
+        alert("Login successful");
         navigate("/home");
         //to hide credentials from frontend
         window.location.reload();
       }
     } catch (error) {
       if (error.response) {
-        // Server returned an error response
-        alert(error.response.data.message || "Login failed. Please try again.");
+        Toastify({
+          text: error.response.data.message || "Something went wrong!",
+        }).showToast();
       } else if (error.request) {
         // Request made but no response received
-        alert("No response from the server. Please check your connection.");
+        Toastify({
+          text: error.request.data.message || "Something went wrong!",
+        }).showToast();
       } else {
         // Other errors
         alert(`An error occurred: ${error.message}`);

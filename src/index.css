@@ -12,3 +12,55 @@ body{
   padding: 0;
 
 }
+/* Base Toastify Styles */
+.toastify {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 250px;
+  max-width: 400px;
+}
+
+/* Success Toast */
+.toastify-success {
+  background: linear-gradient(to right, #56ab2f, #a8e063);
+  color: white;
+}
+
+/* Error Toast */
+.toastify-error {
+  background: linear-gradient(to right, #ff5f6d, #ffc371);
+  color: white;
+}
+
+/* Info Toast */
+.toastify-info {
+  background: linear-gradient(to right, #36d1dc, #5b86e5);
+  color: white;
+}
+
+/* Warning Toast */
+.toastify-warning {
+  background: linear-gradient(to right, #f7971e, #ffd200);
+  color: white;
+}
+
+/* Close Button */
+.toastify .toast-close {
+  cursor: pointer;
+  margin-left: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  color: white;
+}
+
+/* Hover Effect */
+.toastify:hover {
+  opacity: 0.9;
+}

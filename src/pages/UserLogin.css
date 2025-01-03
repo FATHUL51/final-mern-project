@@ -154,3 +154,10 @@
         padding-left: 5px;
     }
 }
+.error.message{
+    color: #ff4081;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-bottom: 0;
+  min-height: 18px;
+}

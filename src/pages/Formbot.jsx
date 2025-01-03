@@ -17,57 +17,20 @@ const Formbot = () => {
   const [currentPlaceholder, setCurrentPlaceholder] = useState(
     "Type your answer..."
   );
+  const [inputType, setInputType] = useState("text"); // Track the current input type
 
   useEffect(() => {
-    // Track page visits and send "1 view" to backend
-    const visitTimestamp = new Date().toISOString();
-    axios
-      .post(`${import.meta.env.VITE_BACKEND_URL}/api/user/page-visit`, {
-        fileId,
-        status: "1view",
-        timestamp: visitTimestamp,
-      })
-      .catch((error) => console.error("Error logging page visit:", error));
-
-    // Handle incomplete form submission when the user leaves
-    const handlePageLeave = () => {
-      if (!isChatComplete) {
-        const leaveTimestamp = new Date().toISOString();
-        axios
-          .post(`${import.meta.env.VITE_BACKEND_URL}/api/user/form-status`, {
-            fileId,
-            status: "incomplete",
-            timestamp: leaveTimestamp,
-          })
-          .catch((error) =>
-            console.error("Error logging incomplete status:", error)
-          );
-      }
-    };
-
-    window.addEventListener("beforeunload", handlePageLeave);
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "hidden") {
-        handlePageLeave();
-      }
-    });
-
-    // Cleanup event listeners on component unmount
-    return () => {
-      window.removeEventListener("beforeunload", handlePageLeave);
-      document.removeEventListener("visibilitychange", handlePageLeave);
-    };
-  }, [fileId, isChatComplete]);
-
-  useEffect(() => {
+    // Fetch form data from the backend
     axios
       .get(
         `${import.meta.env.VITE_BACKEND_URL}/api/user/folders/${fileId}/form`
       )
       .then((response) => {
         const form = response.data.form;
+
         const bubbleTexts = form?.bubble_text || [];
         const images = form?.image || [];
+
         const otherData = [
           { key: "text", value: form?.text?.[0] || "" },
           { key: "number", value: form?.number?.[0] || "" },
@@ -102,11 +65,24 @@ const Formbot = () => {
       });
   }, [fileId]);
 
+  useEffect(() => {
+    // Dynamically set the input type when bubbleQueue or placeholderQueue changes
+    if (bubbleQueue.length > 0) {
+      const currentBubble = bubbleQueue[0];
+      setInputType(currentBubble.type); // Set input type based on the current bubble
+    } else if (placeholderQueue.length > 0) {
+      const currentPlaceholder = placeholderQueue[0];
+      setInputType(currentPlaceholder.key); // Set input type based on placeholder key
+      setCurrentPlaceholder(currentPlaceholder.value); // Update the placeholder text
+    }
+  }, [bubbleQueue, placeholderQueue]); // This effect runs when either queue changes
+
   const sendMessage = () => {
     if (input.trim() === "" || isChatComplete) return;
 
     setMessages((prev) => [...prev, { sender: "user", text: input }]);
 
+    // Process user input for the current bubble or placeholder
     if (bubbleQueue.length > 0) {
       const currentBubble = bubbleQueue[0];
       setResponses((prev) => ({
@@ -266,12 +242,9 @@ const Formbot = () => {
       </div>
       <div className="inputContainer">
         {(() => {
-          let inputType =
-            placeholderQueue.length > 0 ? placeholderQueue[0].key : "text";
-
           switch (inputType) {
-            case "text":
             case "bubble_text":
+            case "text":
             case "image":
             case "button":
             case "email":

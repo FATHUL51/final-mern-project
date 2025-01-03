@@ -8,6 +8,9 @@ import ellipse from "../assets/loginAssets/Ellipse 1.svg";
 import sllipse1 from "../assets/loginAssets/Ellipse 2.svg";
 import google from "../assets/loginAssets/Vector.svg";
 import aster from "../assets/loginAssets/Polygon 2.svg";
+import Toastify from "toastify-js";
+import "toastify-js/src/toastify.css";
+
 import "./UserSignup.css";
 
 const UserSignup = () => {
@@ -51,12 +54,14 @@ const UserSignup = () => {
         const data = response.data;
         setUser(data.user);
         localStorage.setItem("token", data.token);
-        // alert("User created successfully");
+        alert("User created successfully");
         navigate("/Login");
       }
     } catch (error) {
       if (error.response) {
-        alert(error.response.data.message || "Something went wrong!");
+        Toastify({
+          text: error.response.data.message || "Something went wrong!",
+        }).showToast();
       } else if (error.request) {
         alert("No response from the server. Please try again later.");
       } else {
