@@ -349,7 +349,7 @@ const Response = () => {
         </div>
       </div>
       <span />
-      {validSave || validIncompleteLength || starts1 > 1 ? (
+      {save.length || validIncompleteLength > 1 ? (
         <>
           <div className="body1">
             <div className="views">
