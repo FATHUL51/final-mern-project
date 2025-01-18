@@ -128,7 +128,7 @@ const Response = () => {
       if (response.status === 200) {
         // Assuming the response contains the array of visits directly
         setViewscount(response.data); // Set the full array to state
-        // console.log("Views data:", response.data);
+        //console.log("Views data:", response.data);
       } else {
         console.warn("Unexpected response status:", response.status);
         setViewscount([]); // Reset the state if no valid data is received

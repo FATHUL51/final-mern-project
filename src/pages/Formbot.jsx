@@ -17,7 +17,45 @@ const Formbot = () => {
   const [currentPlaceholder, setCurrentPlaceholder] = useState(
     "Type your answer..."
   );
-  const [inputType, setInputType] = useState("text"); // Track the current input type
+  const [inputType, setInputType] = useState("text");
+
+  useEffect(() => {
+    // Track page visits and send "1 view" to backend
+    const visitTimestamp = new Date().toISOString();
+    axios
+      .post(`${import.meta.env.VITE_BACKEND_URL}/api/user/page-visit`, {
+        fileId,
+        status: "1view",
+        timestamp: visitTimestamp,
+      })
+      .catch((error) => console.error("Error logging page visit:", error));
+    // Handle incomplete form submission when the user leaves
+    const handlePageLeave = () => {
+      if (!isChatComplete) {
+        const leaveTimestamp = new Date().toISOString();
+        axios
+          .post(`${import.meta.env.VITE_BACKEND_URL}/api/user/form-status`, {
+            fileId,
+            status: "incomplete",
+            timestamp: leaveTimestamp,
+          })
+          .catch((error) =>
+            console.error("Error logging incomplete status:", error)
+          );
+      }
+    };
+    window.addEventListener("beforeunload", handlePageLeave);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") {
+        handlePageLeave();
+      }
+    });
+    // Cleanup event listeners on component unmount
+    return () => {
+      window.removeEventListener("beforeunload", handlePageLeave);
+      document.removeEventListener("visibilitychange", handlePageLeave);
+    };
+  }, [fileId, isChatComplete]); // Track the current input type
 
   useEffect(() => {
     // Fetch form data from the backend
