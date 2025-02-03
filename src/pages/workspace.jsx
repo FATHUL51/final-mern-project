@@ -330,10 +330,6 @@ const workspace = () => {
     // You can also store the file object itself in state if needed for backend upload
   };
 
-  const handleSharePopupOpen = () => setIsSharePopupVisible(true);
-  const handleSharePopupClose = () =>
-    setIsSharePopupVisible(!isSharePopupVisible);
-
   useEffect(() => {
     const fetchFileData = async () => {
       try {
@@ -351,13 +347,11 @@ const workspace = () => {
         const formData = response.data.form;
 
         if (formData) {
-          // Set formname directly in the state
           setData((prevData) => ({
             ...prevData,
             formname: formData.formname || "",
           }));
 
-          // Filter out unwanted keys and set added components
           const filteredData = Object.entries(formData).filter(
             ([key]) =>
               ![
@@ -387,10 +381,19 @@ const workspace = () => {
             ];
           });
 
+          // Set the components and check if any array is empty
           setAddedComponents(structuredComponents);
+
+          // Check if any component array is empty and set Share button state accordingly
+          const hasValidComponents = Object.values(formData).some(
+            (value) => Array.isArray(value) && value.length > 0
+          );
+
+          setIsShareEnabled(hasValidComponents);
         }
       } catch (error) {
         console.error("Error fetching file data:", error);
+        setIsShareEnabled(false); // Disable the Share button if there is an error
       }
     };
 
@@ -461,19 +464,7 @@ const workspace = () => {
                   `https://final-mern-project-three.vercel.app/Formbot/${fileId}`
                 );
                 Toastify({
-                  text: `✓ Link Copied`,
-                  duration: 3000,
-                  gravity: "bottom",
-                  position: "left",
-                  style: {
-                    background: "white",
-                    color: "#2F80ED",
-                    border: "1px solid #2F80ED",
-                    borderRadius: "12px",
-                    padding: "0.5rem 2.5rem",
-                    display: "flex",
-                    alignItems: "center",
-                  },
+                  text: `Link Copied`,
                 }).showToast();
               }} // Open the share popup on click
             >
