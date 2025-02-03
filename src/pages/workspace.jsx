@@ -306,9 +306,6 @@ const workspace = () => {
     }
   };
 
- 
-  
-
   const handlecontent = () => {
     console.log("Handlecontent function triggered.");
     if (!fileId) {
@@ -459,13 +456,30 @@ const workspace = () => {
                 cursor: isShareEnabled ? "pointer" : "not-allowed",
                 color: "white",
               }}
-               navigator.clipboard.writeText(
-                              `https://final-mern-project-three.vercel.app/Formbot/${fileId}`) // Open the share popup on click
+              onClick={() => {
+                navigator.clipboard.writeText(
+                  `https://final-mern-project-three.vercel.app/Formbot/${fileId}`
+                );
+                Toastify({
+                  text: `✓ Link Copied`,
+                  duration: 3000,
+                  gravity: "bottom",
+                  position: "left",
+                  style: {
+                    background: "white",
+                    color: "#2F80ED",
+                    border: "1px solid #2F80ED",
+                    borderRadius: "12px",
+                    padding: "0.5rem 2.5rem",
+                    display: "flex",
+                    alignItems: "center",
+                  },
+                }).showToast();
+              }} // Open the share popup on click
             >
               Share
             </button>
 
-            
             {/* Save Button */}
             <button
               className="btn1"
