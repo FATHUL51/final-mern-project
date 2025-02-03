@@ -41,8 +41,6 @@ const workspace = () => {
   });
   const [isShareEnabled, setIsShareEnabled] = useState(false);
   const [isSharePopupVisible, setIsSharePopupVisible] = useState(false);
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState("edit");
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isDataAvailable, setIsDataAvailable] = useState(false);
@@ -308,54 +306,8 @@ const workspace = () => {
     }
   };
 
-  const handleShareLink = async (dashBoardId, role) => {
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/user/${dashBoardId}/shareLink`,
-        { role },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (response.status === 201) {
-        navigator.clipboard.writeText(response.data.sharingLink); // Copy link to clipboard
-        Toastify({ text: "Share Link copied to clipboard!" }).showToast();
-      }
-    } catch (error) {
-      console.error("Error creating share link:", error);
-      Toastify({
-        text: error.response?.data?.message || "Failed to create share link.",
-      }).showToast();
-    }
-  };
-
-  const handleShareEmail = async (dashBoardId, email, role) => {
-    if (!email || !role) {
-      alert("Please enter a valid email and select a role.");
-      return;
-    }
-
-    try {
-      const response = await axios.post(
-        `${
-          import.meta.env.VITE_BACKEND_URL
-        }/api/user/${dashBoardId}/shareEmail`,
-        { email, role },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (response.status === 200) {
-        alert("Email shared successfully!");
-        setEmail(""); // Clear input field
-      }
-    } catch (error) {
-      console.error("Error sharing email:", error);
-      alert(error.response?.data?.message || "Failed to share via email.");
-    }
-  };
+ 
+  
 
   const handlecontent = () => {
     console.log("Handlecontent function triggered.");
@@ -507,57 +459,13 @@ const workspace = () => {
                 cursor: isShareEnabled ? "pointer" : "not-allowed",
                 color: "white",
               }}
-              onClick={handleSharePopupOpen} // Open the share popup on click
+               navigator.clipboard.writeText(
+                              `https://final-mern-project-three.vercel.app/Formbot/${fileId}`) // Open the share popup on click
             >
               Share
             </button>
 
-            {/* Share Popup */}
-            {isSharePopupVisible && (
-              <div className="sharecont">
-                <img
-                  className="close"
-                  src={closed}
-                  alt="Close"
-                  onClick={handleSharePopupClose}
-                />
-                {/* Email Sharing */}
-                <div className="emailcont">
-                  <p className="emailinv">Invite by Email</p>
-                  <select
-                    className="dd"
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                  >
-                    <option value="edit">Edit</option>
-                    <option value="view">View</option>
-                  </select>
-                </div>
-                <input
-                  type="email"
-                  className="inputs12"
-                  value={email}
-                  placeholder="Enter email Id"
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <button
-                  className="copy"
-                  onClick={() => handleShareEmail(selectedFolder, email, role)}
-                >
-                  Send Invite
-                </button>
-
-                {/* Link Sharing */}
-                <p className="linkinv">Invite by link</p>
-                <button
-                  className="copy1"
-                  onClick={() => handleShareLink(selectedFolder, role)}
-                >
-                  Copy link
-                </button>
-              </div>
-            )}
-
+            
             {/* Save Button */}
             <button
               className="btn1"
